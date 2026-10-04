@@ -70,12 +70,17 @@ function filterEffective(
       (r.selected ? "live_selected" : "shadow");
 
     if (universe === "live_selected") {
-      if (!r.selected && kind !== "live_selected") {
+      // Strict: both markers required — never admit inconsistent rows
+      if (r.selected !== true || kind !== "live_selected") {
         exclusions.wrong_universe++;
         continue;
       }
     } else if (universe === "shadow") {
-      if (r.selected || kind === "live_selected") {
+      if (r.selected === true || kind === "live_selected") {
+        exclusions.wrong_universe++;
+        continue;
+      }
+      if (kind !== "shadow" && r.shadowSample !== true && r.selected !== false) {
         exclusions.wrong_universe++;
         continue;
       }

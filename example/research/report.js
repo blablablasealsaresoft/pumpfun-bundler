@@ -141,9 +141,8 @@ function run(opts = {}) {
   const shadow = analyzeUniverse(raw, epoch, "shadow", false);
   const shadowNoStale = analyzeUniverse(raw, epoch, "shadow", true);
 
-  const primary =
-    universe === "shadow" ? shadow : universe === "live_selected" ? live : live;
-
+  // INVARIANT: top-level operational status is ALWAYS live_selected.
+  // Shadow may inform research sections only — never emit live PASS / live-trading advice.
   const report = {
     generatedAt: new Date().toISOString(),
     research_epoch: epoch,
@@ -151,8 +150,9 @@ function run(opts = {}) {
     live_economics_unchanged: true,
     kill_switch_unchanged: true,
     note:
-      "Shadow labels are counterfactual curve observations — never mixed into realized trading PnL. Live kill switch unchanged.",
+      "Shadow labels are counterfactual curve observations — never mixed into realized trading PnL and never set top-level operational status.",
     paths: { decisionPath, exitPath },
+    requested_universe: universe,
     requirements: {
       diagnostic_n: DIAGNOSTIC_N,
       promotion_n: PROMOTION_N,
@@ -161,20 +161,23 @@ function run(opts = {}) {
     live_selected: live,
     shadow_ranking: shadow,
     shadow_ranking_ex_stale: shadowNoStale,
-    // Primary status for operational COLLECT remains live-selected
-    raw_n: primary.raw_n,
-    effective_n: primary.effective_n,
-    effective_deployer_n: primary.effective_deployer_n,
-    exclusions: primary.exclusions,
-    remaining_to_diagnostic: primary.remaining_to_diagnostic,
-    remaining_to_promotion: primary.remaining_to_promotion,
-    maxConvWindowN: primary.maxConvWindowN,
-    baseline: primary.baseline,
-    cohorts: primary.cohorts,
-    monotonicity: primary.monotonicity,
-    correlations: primary.correlations,
-    promotion: primary.promotion,
-    status: primary.status,
+    // Operational fields: live_selected only
+    raw_n: live.raw_n,
+    effective_n: live.effective_n,
+    effective_deployer_n: live.effective_deployer_n,
+    exclusions: live.exclusions,
+    remaining_to_diagnostic: live.remaining_to_diagnostic,
+    remaining_to_promotion: live.remaining_to_promotion,
+    maxConvWindowN: live.maxConvWindowN,
+    baseline: live.baseline,
+    cohorts: live.cohorts,
+    monotonicity: live.monotonicity,
+    correlations: live.correlations,
+    promotion: live.promotion,
+    status: live.status,
+    // Research-only shadow verdict (explicitly namespaced)
+    shadow_status: shadow.status,
+    shadow_promotion: shadow.promotion,
   };
 
   return report;
@@ -218,7 +221,9 @@ function printHuman(report) {
   console.log(
     `spearman(pnl): ${fmt(report.shadow_ranking.correlations?.spearmanPnl?.rho, 3)} n=${report.shadow_ranking.correlations?.spearmanPnl?.n}`
   );
-  console.log(`status: ${report.shadow_ranking.status}`);
+  console.log(
+    `shadow_status (research only): ${report.shadow_status ?? report.shadow_ranking.status}`
+  );
   if (report.shadow_ranking.skip_cohort_counts) {
     console.log("skip cohorts:");
     for (const [k, v] of Object.entries(report.shadow_ranking.skip_cohort_counts)) {
@@ -231,7 +236,7 @@ function printHuman(report) {
     if (v) console.log(`  ${k}: ${v}`);
   }
   console.log("");
-  console.log("next action:");
+  console.log("next action (from live_selected only):");
   if (report.status === STATUS.COLLECT) {
     console.log(
       "  COLLECT — live_selected stalled under kill is OK; accumulate shadow labels for ranking"
@@ -243,6 +248,15 @@ function printHuman(report) {
   else if (report.status === STATUS.FAIL)
     console.log("  keep live gate OFF; improve deployer/selection model");
   else console.log("  INVALID — fix leakage/instrumentation");
+  if (
+    report.shadow_status === STATUS.PASS ||
+    report.shadow_status === STATUS.FAIL ||
+    report.shadow_status === STATUS.DIAGNOSTIC
+  ) {
+    console.log(
+      "  (shadow_status is research-only — does NOT authorize live trading)"
+    );
+  }
   console.log("");
   console.log(
     "HARD FREEZE: sizing/fees/Δ0/latency/dead/tranche/SL/max-hold/conviction-gate/kill unchanged"

@@ -532,6 +532,85 @@ test("shadow universe separate from live_selected", () => {
   assert.ok(shadowEx.exclusions.stale_shadow_cohort >= 1);
 });
 
+// live_selected requires BOTH selected and sampleKind markers
+test("live_selected requires both selected and kind markers", () => {
+  const rows = [
+    mkRecord({
+      candidateId: "ok",
+      mint: "OK1",
+      selected: true,
+      sampleKind: "live_selected",
+    }),
+    mkRecord({
+      candidateId: "bad1",
+      mint: "B1",
+      selected: true,
+      sampleKind: "shadow", // inconsistent
+    }),
+    mkRecord({
+      candidateId: "bad2",
+      mint: "B2",
+      selected: false,
+      sampleKind: "live_selected", // inconsistent
+    }),
+  ];
+  const live = filterEffective(rows, { universe: "live_selected" });
+  assert.strictEqual(live.effective_n, 1);
+  assert.ok(live.exclusions.wrong_universe >= 2);
+});
+
+// INVARIANT: shadow can never set top-level operational status / live PASS advice
+test("shadow can never set live operational status", () => {
+  const tmpD = path.join(__dirname, "_tmp_shadow_status_dec.jsonl");
+  const tmpE = path.join(__dirname, "_tmp_shadow_status_ex.jsonl");
+  // Fabricate many high-scoring shadow outcomes that would PASS if mis-attributed
+  const lines = [];
+  for (let i = 0; i < 120; i++) {
+    lines.push(
+      JSON.stringify({
+        mint: "ShMint" + i + "pump",
+        createSig: "sig" + i,
+        decision: "skip",
+        skipReason: "kill 7d|outcome",
+        sampleKind: "shadow",
+        shadowSample: true,
+        skipCohort: "kill_gated",
+        sampleSegment: "post_fix",
+        researchEpoch: RESEARCH_EPOCH,
+        modelVersion: "deployer85-shrink-v1",
+        globalConvPct: 50 + (i % 50),
+        globalConvN: 200,
+        creatorScore: 50 + (i % 50),
+        effectiveScore: 50 + (i % 50),
+        ret30s: i - 10,
+        mfe30s: i,
+        mae30s: -5,
+        ts: 1_700_000_000_000 + i,
+      })
+    );
+  }
+  fs.writeFileSync(tmpD, lines.join("\n") + "\n");
+  fs.writeFileSync(tmpE, "");
+  const { run } = require("./report");
+  const report = run({
+    decisions: tmpD,
+    exits: tmpE,
+    epoch: RESEARCH_EPOCH,
+    universe: "shadow", // previously could leak into report.status
+  });
+  fs.unlinkSync(tmpD);
+  fs.unlinkSync(tmpE);
+  assert.strictEqual(report.status, STATUS.COLLECT); // live empty → COLLECT
+  assert.strictEqual(report.live_selected.status, STATUS.COLLECT);
+  assert.strictEqual(report.effective_n, 0); // no live fills
+  assert.notStrictEqual(report.status, STATUS.PASS);
+  assert.ok(Object.prototype.hasOwnProperty.call(report, "shadow_status"));
+  // Even if shadow research would PASS, top-level must remain live COLLECT
+  if (report.shadow_status === STATUS.PASS) {
+    assert.strictEqual(report.status, STATUS.COLLECT);
+  }
+});
+
 console.log("");
 console.log(`results: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
