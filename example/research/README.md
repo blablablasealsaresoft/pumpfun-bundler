@@ -2,15 +2,21 @@
 
 **Does not change live economic behavior.**
 
-Answers one question: does frozen selection/conviction ranking order candidates by forward outcome quality?
+Answers: does frozen selection/conviction ranking order candidates by forward outcome quality?
+
+## Universes (never mixed)
+
+| Universe | Meaning |
+|----------|---------|
+| `live_selected` | Real buys with completed executable exits (realized PnL) |
+| `shadow` | Counterfactual curve labels for skips — **no trade submitted** |
+
+Live kill switch may stall `live_selected` growth; shadow collection continues. Stale-create shadows are a distinct `skipCohort` (`stale_create`); use `--` ex-stale view for ranking that answers executable-time selection quality.
 
 ## Commands
 
 ```bash
-# Human + JSON report (reads ../../../wallets/*-traces.jsonl)
 npm run research:promotion
-
-# Deterministic unit tests
 npm run test:research
 ```
 
@@ -22,16 +28,4 @@ npm run test:research
 | B | `effective_n >= 30` and window depth OK | `DIAGNOSTIC` (no live gate change) |
 | C | `effective_n >= 100` | `PASS` or `FAIL` |
 
-## PASS requires (predeclared)
-
-- `baseline < top5 < top2` on median / trimmed / MFE-or-win proxy
-- quartile monotonicity agreement
-- top2 profit factor > 1
-- MAE not materially worse up the ladder
-- top2 still beats top5 after dropping 2 best tails
-- bootstrap of top25 vs baseline not obviously contradictory
-- no leakage flags
-
-## Hard freeze
-
-Do not change sizing, fees, Δ0, latency, dead/tranche, SL, max-hold, or conviction gate based on this harness.
+Operational COLLECT status tracks **live_selected**. Shadow ranking is reported alongside for research while the safety kill holds.

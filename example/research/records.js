@@ -161,6 +161,13 @@ function toResearchRecord(decision, exit) {
   const segment = segmentOf(decision);
   const leak = detectLeakage(decision);
 
+  const skipReasonRaw = decision.skipReason || "";
+  const isOutcomeRow =
+    typeof skipReasonRaw === "string" && skipReasonRaw.includes("|outcome");
+  const baseReason = isOutcomeRow
+    ? skipReasonRaw.replace(/\|outcome$/, "")
+    : skipReasonRaw;
+
   return {
     candidateId: researchIdentity(decision),
     mint: decision.mint || null,
@@ -181,13 +188,25 @@ function toResearchRecord(decision, exit) {
     deployerScore: num(decision.deployerScore) ?? null,
     selected: decision.decision === "buy",
     selectionReason:
-      decision.decision === "buy"
-        ? "buy"
-        : decision.skipReason || "skip",
+      decision.decision === "buy" ? "buy" : baseReason || "skip",
     knownAtDecision: knownAtDecision(decision),
     convictionWindowN: num(decision.globalConvN, decision.convictionWindowN) ?? 0,
     rankAtDecision: num(decision.rankAtDecision) ?? null,
     percentileAtDecision: conv,
+    sampleKind:
+      decision.sampleKind ||
+      (decision.decision === "buy"
+        ? "live_selected"
+        : decision.shadowSample
+          ? "shadow"
+          : isOutcomeRow || decision.decision === "skip"
+            ? "shadow"
+            : "live_selected"),
+    shadowSample: decision.decision === "skip" || !!decision.shadowSample,
+    skipCohort:
+      decision.skipCohort ||
+      (decision.decision === "skip" ? classifySkipCohort(baseReason) : null),
+    executableShadow: !!decision.executableShadow,
     execution: {
       attempted: decision.decision === "buy",
       submitted: decision.decision === "buy",
@@ -223,6 +242,20 @@ function toResearchRecord(decision, exit) {
   };
 }
 
+function classifySkipCohort(reason) {
+  const r = reason || "";
+  if (/stale create/i.test(r)) return "stale_create";
+  if (/^kill /i.test(r) || /avgExecPnl/i.test(r) || /discrimination/i.test(r))
+    return "kill_gated";
+  if (/mayhem/i.test(r)) return "mayhem";
+  if (/creator SOL/i.test(r)) return "creator_sol";
+  if (/admission/i.test(r) || /selection reject/i.test(r)) return "admission_floor";
+  if (/slot lag/i.test(r)) return "slot_lag";
+  if (/reserve|max concurrent/i.test(r)) return "capacity";
+  if (/farm/i.test(r)) return "farm";
+  return "other_skip";
+}
+
 /**
  * Load and join decision + exit traces into research records.
  */
@@ -242,16 +275,12 @@ function buildRecords({ decisionPath, exitPath, epochOnly = RESEARCH_EPOCH } = {
   const raw = [];
   for (const d of decisions) {
     if (!d.mint) continue;
-    // Prefer buy rows; also keep skip|outcome counterfactuals
     const isBuy = d.decision === "buy";
     const isCf =
       typeof d.skipReason === "string" && d.skipReason.includes("|outcome");
-    if (!isBuy && !isCf) {
-      // Still record skips for survivor-bias analysis when they carry scores
-      if (d.globalConvPct == null && d.convictionPct == null && d.creatorScore == null) {
-        continue;
-      }
-    }
+    // Shadow labels: only completed |outcome rows (not the pre-label skip stamp).
+    // Live: buy rows (exit joined when present).
+    if (!isBuy && !isCf) continue;
     const ex = isBuy ? exitByMint.get(d.mint) : null;
     raw.push(toResearchRecord(d, ex));
   }

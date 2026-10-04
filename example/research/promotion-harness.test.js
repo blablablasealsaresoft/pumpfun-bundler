@@ -58,6 +58,7 @@ function mkRecord(overrides = {}) {
     softFloorScore: 50,
     deployerScore: 50,
     selected: true,
+    sampleKind: "live_selected",
     selectionReason: "buy",
     knownAtDecision: false,
     convictionWindowN: MIN_CONV_WINDOW_N,
@@ -76,7 +77,11 @@ function mkRecord(overrides = {}) {
       complete: true,
     },
   };
-  return { ...base, ...overrides, outcome: { ...base.outcome, ...(overrides.outcome || {}) } };
+  return {
+    ...base,
+    ...overrides,
+    outcome: { ...base.outcome, ...(overrides.outcome || {}) },
+  };
 }
 
 // 1. effective_n inclusion/exclusion
@@ -90,7 +95,7 @@ test("effective_n inclusion/exclusion", () => {
     }),
     mkRecord({ candidateId: "c", mint: "C", convictionScore: null, rankScore: null, softFloorScore: null }),
   ];
-  const f = filterEffective(rows);
+  const f = filterEffective(rows, { universe: "live_selected" });
   assert.strictEqual(f.effective_n, 1);
   assert.ok(f.exclusions.censored_outcome >= 1);
   assert.ok(f.exclusions.missing_conviction >= 1);
@@ -103,7 +108,7 @@ test("duplicate removal", () => {
     mkRecord({ candidateId: "x", mint: "M1" }),
     mkRecord({ candidateId: "y", mint: "M1" }), // same mint buy
   ];
-  const f = filterEffective(rows);
+  const f = filterEffective(rows, { universe: "live_selected" });
   assert.strictEqual(f.effective_n, 1);
   assert.ok(f.exclusions.duplicate >= 2);
 });
@@ -117,7 +122,7 @@ test("missing outcome exclusion", () => {
       outcome: { status: "missing", complete: false, realizedPnl: null },
     }),
   ];
-  const f = filterEffective(rows);
+  const f = filterEffective(rows, { universe: "live_selected" });
   assert.strictEqual(f.effective_n, 0);
   assert.ok(f.exclusions.missing_outcome >= 1);
 });
@@ -166,7 +171,7 @@ test("epoch isolation", () => {
       sampleSegment: "pre_fix",
     }),
   ];
-  const f = filterEffective(rows, { epoch: RESEARCH_EPOCH });
+  const f = filterEffective(rows, { epoch: RESEARCH_EPOCH, universe: "live_selected" });
   assert.strictEqual(f.effective_n, 1);
   assert.ok(f.exclusions.wrong_epoch >= 1);
 });
@@ -248,7 +253,7 @@ test("PASS blocked below n=100", () => {
       })
     );
   }
-  const f = filterEffective(rows);
+  const f = filterEffective(rows, { universe: "live_selected" });
   const cohorts = buildCohorts(f.effective);
   const mono = monotonicityReport(cohorts);
   const corr = correlations(f.effective);
@@ -285,7 +290,7 @@ test("DIAGNOSTIC allowed at n>=30", () => {
       })
     );
   }
-  const f = filterEffective(rows);
+  const f = filterEffective(rows, { universe: "live_selected" });
   assert.ok(f.effective_n >= DIAGNOSTIC_N);
   const cohorts = buildCohorts(f.effective);
   const mono = monotonicityReport(cohorts);
@@ -327,7 +332,7 @@ test("PASS evaluation at n>=100", () => {
       })
     );
   }
-  const f = filterEffective(rows);
+  const f = filterEffective(rows, { universe: "live_selected" });
   assert.ok(f.effective_n >= PROMOTION_N);
   const cohorts = buildCohorts(f.effective);
   const mono = monotonicityReport(cohorts);
@@ -369,7 +374,9 @@ test("leakage invalidates promotion", () => {
     );
   }
   // Put leak on an effective row after filter — inject into evaluate directly
-  const f = filterEffective(rows.filter((r) => !r.leakageReasons.length));
+  const f = filterEffective(rows.filter((r) => !r.leakageReasons.length), {
+    universe: "live_selected",
+  });
   f.effective[0].leakageReasons = ["explicit_leak_flag"];
   const cohorts = buildCohorts(f.effective);
   const mono = monotonicityReport(cohorts);
@@ -462,6 +469,67 @@ test("research identity stable", () => {
 test("detectLeakage flags", () => {
   const reasons = detectLeakage({ lookahead: true });
   assert.ok(reasons.includes("explicit_leak_flag"));
+});
+
+// shadow universe never mixes into live_selected
+test("shadow universe separate from live_selected", () => {
+  const rows = [
+    mkRecord({
+      candidateId: "live1",
+      mint: "L1",
+      selected: true,
+      sampleKind: "live_selected",
+      outcome: {
+        status: "complete",
+        complete: true,
+        realizedPnl: -20,
+        execMfe: -10,
+        execMae: -25,
+      },
+    }),
+    mkRecord({
+      candidateId: "sh1",
+      mint: "S1",
+      selected: false,
+      sampleKind: "shadow",
+      shadowSample: true,
+      skipCohort: "kill_gated",
+      selectionReason: "kill 7d avgExecPnl=-30%",
+      outcome: {
+        status: "complete",
+        complete: true,
+        realizedPnl: 5,
+        execMfe: 12,
+        execMae: -8,
+      },
+    }),
+    mkRecord({
+      candidateId: "stale1",
+      mint: "ST1",
+      selected: false,
+      sampleKind: "shadow",
+      shadowSample: true,
+      skipCohort: "stale_create",
+      selectionReason: "stale create 1200ms",
+      outcome: {
+        status: "complete",
+        complete: true,
+        realizedPnl: 40,
+        execMfe: 50,
+        execMae: -5,
+      },
+    }),
+  ];
+  const live = filterEffective(rows, { universe: "live_selected" });
+  const shadow = filterEffective(rows, { universe: "shadow" });
+  const shadowEx = filterEffective(rows, {
+    universe: "shadow",
+    excludeStaleShadow: true,
+  });
+  assert.strictEqual(live.effective_n, 1);
+  assert.strictEqual(shadow.effective_n, 2);
+  assert.strictEqual(shadowEx.effective_n, 1);
+  assert.ok(shadowEx.exclusions.stale_shadow_cohort >= 1);
 });
 
 console.log("");
