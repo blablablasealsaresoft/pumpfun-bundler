@@ -1,23 +1,33 @@
 /**
  * effective_n definition + duplicate / exclusion accounting.
  *
+ * Universes (never mixed into each other for promotion denominators):
+ *  - live_selected: real buys with complete executable exit outcomes
+ *  - shadow: counterfactual curve labels for skips (no trade submitted)
+ *
  * A record counts toward effective_n iff ALL of:
- *  1. researchEpoch matches the declared epoch (default post_fix_v1)
- *  2. selected === true (live buy) OR has complete counterfactual outcome
+ *  1. researchEpoch / sampleSegment matches declared epoch
+ *  2. sampleKind matches requested universe
  *  3. outcome.status === complete with realizedPnl number
- *  4. convictionScore (percentile) OR softFloorScore present at decision time
- *  5. not a duplicate of an earlier research identity / mint-buy
+ *  4. convictionScore OR softFloorScore present at decision time
+ *  5. not a duplicate
  *  6. no leakage flags
- *  7. decision not marked stale (selectionReason containing stale create after buy —
- *     buys that should have been aborted are excluded if flagged)
  */
 "use strict";
 
 const { RESEARCH_EPOCH } = require("./promotion-protocol");
 
-function filterEffective(records, { epoch = RESEARCH_EPOCH, selectedOnly = true } = {}) {
+function filterEffective(
+  records,
+  {
+    epoch = RESEARCH_EPOCH,
+    universe = "live_selected", // "live_selected" | "shadow"
+    excludeStaleShadow = false,
+  } = {}
+) {
   const exclusions = {
     wrong_epoch: 0,
+    wrong_universe: 0,
     incomplete_outcome: 0,
     censored_outcome: 0,
     missing_outcome: 0,
@@ -25,13 +35,13 @@ function filterEffective(records, { epoch = RESEARCH_EPOCH, selectedOnly = true 
     missing_conviction: 0,
     duplicate: 0,
     stale_decision: 0,
+    stale_shadow_cohort: 0,
     malformed: 0,
     leakage: 0,
-    unselected: 0,
   };
 
-  const seenMintBuy = new Set();
   const seenId = new Set();
+  const seenMint = new Set();
   const effective = [];
 
   for (const r of records) {
@@ -54,25 +64,46 @@ function filterEffective(records, { epoch = RESEARCH_EPOCH, selectedOnly = true 
       exclusions.leakage++;
       continue;
     }
-    if (selectedOnly && !r.selected) {
-      exclusions.unselected++;
-      continue;
+
+    const kind =
+      r.sampleKind ||
+      (r.selected ? "live_selected" : "shadow");
+
+    if (universe === "live_selected") {
+      // Strict: both markers required — never admit inconsistent rows
+      if (r.selected !== true || kind !== "live_selected") {
+        exclusions.wrong_universe++;
+        continue;
+      }
+    } else if (universe === "shadow") {
+      if (r.selected === true || kind === "live_selected") {
+        exclusions.wrong_universe++;
+        continue;
+      }
+      if (kind !== "shadow" && r.shadowSample !== true && r.selected !== false) {
+        exclusions.wrong_universe++;
+        continue;
+      }
+      if (excludeStaleShadow && r.skipCohort === "stale_create") {
+        exclusions.stale_shadow_cohort++;
+        continue;
+      }
     }
+
     if (seenId.has(r.candidateId)) {
       exclusions.duplicate++;
       continue;
     }
-    if (r.selected && r.mint) {
-      const k = `buy:${r.mint}`;
-      if (seenMintBuy.has(k)) {
-        exclusions.duplicate++;
-        continue;
-      }
-      seenMintBuy.add(k);
+    const mintKey = `${universe}:${r.mint || r.candidateId}`;
+    if (r.mint && seenMint.has(mintKey)) {
+      exclusions.duplicate++;
+      continue;
     }
     seenId.add(r.candidateId);
+    if (r.mint) seenMint.add(mintKey);
 
     if (
+      universe === "live_selected" &&
       typeof r.selectionReason === "string" &&
       /stale create/i.test(r.selectionReason) &&
       r.selected
@@ -117,10 +148,10 @@ function filterEffective(records, { epoch = RESEARCH_EPOCH, selectedOnly = true 
     effective_n: effective.length,
     effective,
     exclusions,
+    universe,
   };
 }
 
-/** Distinct deployers in an effective set */
 function effectiveDeployerN(records) {
   const s = new Set();
   for (const r of records) {
