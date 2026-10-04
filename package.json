@@ -7,7 +7,9 @@
   "browser": "./dist/browser/index.js",
   "types": "dist/cjs/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run test:research",
+    "test:research": "node example/research/promotion-harness.test.js",
+    "research:promotion": "node example/research/report.js",
     "build": "rimraf dist/ && npm run build:node && npm run build:browser",
     "build:node": "tsc && tsc -p tsconfig.cjs.json",
     "build:browser": "rollup -c rollup.config.js --bundleConfigAsCjs",
