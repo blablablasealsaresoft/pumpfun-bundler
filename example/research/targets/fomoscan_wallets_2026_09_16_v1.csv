@@ -1,0 +1,356 @@
+trader_id,handle,chain,address,verification_status,sources,chain_observed_swaps,chain_first_observed,chain_last_observed,chain_distinct_tokens,chain_volume_usd
+483a0be9-79ec-544e-947e-9fd6a9aee630,leo919,solana,25quup9DnPg3jTQF2aWqfVTbLmTeMyAFwthiLiUzw3iq,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,12,2026-08-14 16:51:37-07,2026-09-03 13:11:12-07,5,18867.592805
+099def74-7ffb-5a88-b821-73d28d5d4709,LeKorsaire,solana,26ReZzAoknApeQDtsRGuR8R8pdwst9DpUxUoWHHW9rfj,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,21,2026-09-07 23:38:46-07,2026-09-16 12:15:11-07,3,21150.484905
+455fe58f-20c2-5d96-8f06-0b438905878f,onchainshifu,solana,27fVToMvpC76svVhUhFaRLMnd7H9ySpwKgnJUDZnQDgh,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+1fb324ca-ad5b-53e4-845f-a7549d00e4a8,GivenThickCrab,solana,27oGXxQwd2yAxgocUd1yCrGm6K9tCzUSVBsskJWeoDoX,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,16,2026-09-08 11:52:36-07,2026-09-16 12:04:41-07,8,1465.287616
+1ed60276-9bbe-5850-95b3-275f9e5c02f0,kans,solana,28UMQsBvABwoi4KUPqEX2DidZ4WS1y74Px2zw8f1EDJo,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+463fe9a7-e1e8-54b0-acc7-30e2d1b572bd,ulTRA_folle,solana,2aPnFbwMj2oGCDzS9MjCWvJiQdSNaF9o3zs3CVR6ZJ49,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,67,2026-08-28 16:50:10-07,2026-09-16 02:50:17-07,19,251143.931833
+0c03596e-38bd-52c1-a431-b9f762d57f33,AwfulBasicTuna,solana,2b3kePiwRi5eSkSE73jnqcybnxGP4UiL4xggQtViZ3zb,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,132,2026-08-27 17:43:39-07,2026-09-16 05:59:01-07,62,33010.397923
+926dfcd3-79e8-57a9-a87e-a87d8fa4bfae,hypnobuys,solana,2btcfLbfWGNfkPEs3KNJ8Y3TwSNLEDZT6PE9M74cs5YG,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+065fcbaf-c579-53e6-86ef-b1271eed7397,bul1ish,solana,2jPxsKkZ6fg66YA3XSAaP6E2KT1ED4KpNQFpZy4UYEb1,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,66,2026-09-03 17:29:29-07,2026-09-09 17:39:23-07,26,1050426.048573
+331edc01-340a-56b1-affc-fca7b83c55a7,riskanonymous,solana,2KBGGFSGge6d2XY7eH41GysoegVYHbHy1c6nbLcErZpy,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,114,2026-09-12 13:34:34-07,2026-09-16 13:47:40-07,31,21997.587430
+14a0b79f-9d8a-549d-ad29-056df4985bae,TheBoggartt,solana,2kDuF558okYKx4P3va7nCigFSBtN3uCjRgERQqoNnxtx,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+2cf8b9af-ecf0-55c0-8af4-8bcfe0ff6be4,velopep,solana,2q5n84YEVfQRuZxBhhMWxxXumR8v7pfZNVvoH8aGmv49,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+bf61c9d5-4ff9-5b20-9292-c39145fc0df2,SetoKaiba,solana,2q89XvYrgrChEQcbeY5qSaR5GxHoQQp5P1uaDkJLfHUh,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+45359c6a-6c8b-5cc3-b7d5-e74541965236,RichardFinger,solana,2XnoydUpz3GXTosBD1MzgANemwiCC2E9rUEXyptxtJsS,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,53,2026-09-07 11:42:46-07,2026-09-16 06:47:38-07,21,63054.976322
+8578e28d-8453-52c8-933f-fad4e25e6471,CryptoDjip,solana,2YQe9zc3NRWWvSuWmcrpHrtW9A3cPa6SmUpgXdQGpE64,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+913b6bd9-cd71-5629-a8b8-2b55f3c47d2c,techquant,solana,2yRNs3fqMCtehscPnkWYYyDC7thwtHZuqULGkiUq9N4i,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+30fa9eb3-5d6a-5b61-a0d2-5862cdc543d5,EAZY_,solana,2Zyd2M65hKkua8u6rS5dbMFLQUiM4LAd2WnzSQ18ZR2k,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,41,2026-08-27 10:34:54-07,2026-09-16 12:45:22-07,11,35384.508116
+03a63b75-9b1f-53f1-98c7-b3ac0a1d15c8,ejcufjdjd,solana,359h1kykmMZNcvH7EdrSroHoj3a5kxWNCopbRYEvfQiR,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,8,2026-08-28 21:45:34-07,2026-09-02 01:01:42-07,3,12003.066319
+3c6b4d93-1196-5730-bd7e-307305d8e3df,daddyriskbets,solana,36SaRhNn8pGs2erPD5HrPo62922kYXdzSVQWMsfHgHna,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,5,2026-09-12 10:23:08-07,2026-09-13 10:34:20-07,2,15638.184757
+785b5547-1422-59fc-9f68-6a3cf6e39bfb,MrMetavers3,solana,39gVBmBzsZ8yzcWy6pQsmVc9VNpLUgksDQqXVnNJBWnZ,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3af04dab-c4e7-5b44-b1dc-c3e26d3087cc,thedaddyofmemes,solana,39MP76mgJQdRrsu91sPUwatGprxRdBA3KHwJMLbSssTs,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+3d344f22-e127-5ab5-95b1-68a2d8c280d2,ste33zin,solana,3ampiiA7W6f32iDZENhazXiy2bRX6xLXSxthiZcWn71Y,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,63,2026-09-09 19:52:03-07,2026-09-16 03:11:09-07,9,57390.176625
+241c2e66-4868-5e75-ab56-c1bcd37eb70a,RealMaxGains,solana,3bM2FEPFFbf5rKHhufBWJLqHzs6ZbUz1Lf4GEu1Cu5qp,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,110,2026-08-30 12:58:55-07,2026-09-16 12:27:21-07,19,49865.160615
+225650de-f1b2-5d3f-a872-8c1c12c1a793,socrates,solana,3exsJFCeSYf1SvSciTWiwnkAXGSs8bjHAwgqsWoHHUma,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+5fcbf2af-60cf-52f5-9a78-fce0fcbdc4bf,linesandthoughts,solana,3hAnAznv1KtQzTEXfxoC3LmQC6RxPCaVBZ9eNA4WbVtT,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+1e6179cb-d78f-56f6-9f3e-45919768f78d,latentliq,solana,3hHaeUvAHXxZpq4GMnjnKE4ShgvFHfkLwVXnPtJYT6UJ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+14a0b79f-9d8a-549d-ad29-056df4985bae,TheBoggartt,solana,3JrrvL9XfBbMpm8Yy7RPuXqn1K6KyYXgYsHjQtfLuz9C,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,564,2026-08-14 18:59:00-07,2026-09-16 14:35:57-07,207,249015.614638
+7a89b116-48f6-58fd-b10f-9388d03a9489,0xbr9,solana,3K5D31YH4qE9X4JDK8Jo2rHdvTDLZyybELThdBGKCmx5,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+100c47b7-9e64-561b-88aa-20bf59c3b9d1,sharingan,solana,3sMAkVZKL53rEHtiFHgCBaa4RHNLoQexmsFs3iYwKuSe,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+1ae0e353-878b-5822-96e3-3c980d6ab387,unknowncapital,solana,3t4ZSgcar7KdWSLYdSfQcRNF4pVzNarx4KgmRxcKtkas,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,2,2026-09-13 11:25:17-07,2026-09-14 05:54:57-07,2,518.179361
+7a81369b-a724-51ff-89d5-06c75e06cf51,stngzx,solana,3tf1VtgnTVvFmEHyrfQtChMNu8yFEYocyEz9PNeYhGv1,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+5ada0a6e-6451-5802-bc10-9f692c6dc891,Rezgar_p,solana,3UfwkQQSFR1YMM4VukUZ5kzkPNrsD1RAyob3xU7FxYCP,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+10bfd7fd-b04c-51db-ba7a-544dc782f2c6,view,solana,3w9Nc6xaH3nRGDZGURfVYqhEgvyhLCb1pJm1SfCkdxnW,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,62,2026-09-09 05:49:59-07,2026-09-16 10:49:17-07,9,75073.806882
+21aca0ea-d7c0-5f13-8ee6-6b3c29c9ae4f,ZanyBumpyLoon,solana,3WLD2uD6PrNfFWhVSqTkenezUEMUAs9bUg2fc13aEp6B,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,128,2026-09-06 12:49:16-07,2026-09-16 06:31:07-07,40,257100.939300
+a85a81b5-b2f2-5554-bdda-9af9632e86b0,marcoadriano51,solana,3WQpGPjX6hMbqoaeBRK22wPuV7BjehgkXJvVDAcVA6kd,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+6302139b-9139-5b1f-be05-a64cb344d8f8,nftimm,solana,3XjVjZ4ZN9nKRnxrhVtFztR6phbWfEmRYrKoBbCqbd4F,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+46d6a1ee-7f2f-5879-afa6-23ddeba4b0e3,man_donut_,solana,3YWoB396ZFuhqCdASM8NzhyBtB1rMTZC7ZULSKEnRenf,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,48,2026-08-28 06:56:27-07,2026-09-16 14:37:37-07,24,52701.184104
+00a53372-1b99-5aec-a4b1-a13293dbf50b,TubifexPupa,solana,3zFnLrtJmVj3dvDNRsGTyir7uM663FShbi1XwBCRqfPQ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,313,2026-08-26 06:08:47-07,2026-09-16 00:58:41-07,97,419371.703495
+218ee32c-6567-50f2-be25-bd886aff32a5,dapersiantrader,solana,3zWUUR3pDyjfYJJ7AEeTDB1VbZ6W21MxLptN3kvZHtSs,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+0b628028-783e-53c7-9332-a07cbf9abf95,TokenHouseINC,solana,49yD7xXGzkNu1xktpynS22KaytJNGPCuuM3Z6TTKx1HT,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,21,2026-08-30 13:16:21-07,2026-09-16 12:32:08-07,7,39799.594704
+0e52fff1-7bd4-5802-98f0-f679e64c7fda,ZippyRainyMacaw,solana,4aobBeHzCiLt3rwAmst9bLx18CTPmD7nMH3mfVBy8keF,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,3,2026-09-12 22:03:25-07,2026-09-15 12:57:58-07,2,17000
+ac5a89ab-3a9d-5678-819f-3c4976137847,69dd,solana,4aWqYSMJc9bVDaMUTBJqJ2K2TTgSMWWBsQqXPM4bKwDc,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+11b98c72-d9d9-5f7b-b11c-7d57973a0b63,DomiNixkyy,solana,4bcpACsXV9pubUxxtAtmr7DyMQVQzBFytA3CEBram4Hx,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+4b65caff-97de-58d8-b5f2-651abb128ed3,TarronBrump,solana,4cdzCdpZpw476py42q3ChStwmHsYo4CfHroaQzsnMrSN,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,180,2026-09-04 09:35:22-07,2026-09-16 12:18:16-07,48,554027.110030
+97713137-8d13-5c01-9e5a-db7a0f57d80c,PinkyndTheGainz,solana,4DGo7rTAV9MixZDLtJPeULMkHZVUYpSghRcdobNU2rLu,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+b7bc91be-f94b-510b-9eeb-9e4c9240a232,MANOFWAR,solana,4EPBt63ESeyhc3KxWgfUwr3BtQbu4oQQ9mpgCVgZoikS,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+02a5431d-b63c-5ccb-abf9-557cb39128d8,cncmarmot,solana,4GG1LRNUtpwfBnoVoAnsnHGUx6ockgkibhbFG19Nn7Rk,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,59,2026-09-09 16:28:39-07,2026-09-15 03:36:51-07,2,65631.509087
+3d2b4e45-24ab-5fdf-8fb5-24d1af422b3b,maxpain,solana,4hMB9bjcmyhpVdTmZQFPBwFCP2JmK2ChFmLCZCrNb3Gt,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,67,2026-08-26 04:57:40-07,2026-09-16 05:28:31-07,7,172642.403720
+43888509-73ef-5ef4-b64a-e791aa02c782,JohnDriftwood,solana,4iaGrSqtnTVTFmpaacqSYgmW9q4XaoxKcSstiRueXoeu,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,12,2026-09-01 15:05:48-07,2026-09-08 09:54:08-07,6,1328.523948
+f0a49ebb-1504-5f8e-a19e-252824d05543,degcap,solana,4ikgB3exEABA4p7K3E3MceEvVBNDjaT2WAuMoHsoXy3B,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+38004c94-ced9-5013-950d-59b29fe740e6,WilyUpperLouse,solana,4LbHN8xtTfYYrnZAZ6TTQH275nuerBCSWfUAeHgsBtJN,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,19,2026-09-03 04:46:24-07,2026-09-05 08:02:04-07,2,218111.935653
+46e35485-ca2d-526b-a61b-60dbc49c8613,tradetozero,solana,4MHxMgcLv2JPrfH7Kg6FZXiNyfbQfPZ54YatxPQai15D,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,48,2026-09-08 15:15:47-07,2026-09-16 10:01:34-07,11,32004.360141
+716957e5-6177-5bb1-94e7-92364bb327b7,deliveryydriver,solana,4MMvVYoz2ieT48MDM1CXSoLm4uZQZM16PcvNSq9UsNvu,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+f3bd5d55-9856-59ce-b9b8-884dfbdf9203,mandalapore,solana,4prdVt6eEVhzL2BcWKpoacJHSkT2543KCCWUykA2bXPw,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+33d5002e-870b-5770-9f0b-87b7d0e06509,GingFreecs,solana,4s8SmVDS9K8ut5VKWDJ1zVPpWcZQTmyvTF8ewHrsSWRs,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,601,2026-09-05 17:50:44-07,2026-09-16 09:43:36-07,155,234039.832787
+1283f0a1-8e8f-5d05-8c4b-442f011a4756,0xWives,solana,4TCBpS4jC2yWcBrayikGxRzf36Ed1JCcwwYyTzcfQXoa,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,3,2026-08-31 12:44:16-07,2026-09-10 14:35:02-07,3,3497.928806
+86aec962-c9e7-568a-8d6b-491d2781a18a,UbikMaximalist,solana,4ToNS9NpuSFa6uqiysM6hpJaovHVehegaM2KgE9AQuXQ,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+005e3473-211c-5fad-b577-ead7b07d5fea,pyoonpyoon,solana,4zCKTmt8e36EpJkkj1VwbiUUyVVksiyMg6dmPjasmfk7,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+00a53372-1b99-5aec-a4b1-a13293dbf50b,TubifexPupa,solana,51hE7oK7rRsG7FZESY4pXuZfgP4mNN31L9LqbzSYGm4V,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+3cee6460-644e-51fe-a4be-922b2abcf8c2,InanimateCarbonRod,solana,56VWcZnuf9zJH4uHKQVJ45SG5Yj839rCtYjSspCMMcZp,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,308,2026-08-31 11:09:52-07,2026-09-16 14:40:09-07,93,187121.108821
+0ff1e96f-da8d-558d-8941-62f1e316876a,thebiglong,solana,5a413VTS5HPJwcnvKCYJmGREXvXhSqgwQrp84eLedbKP,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,11,2026-09-06 17:21:41-07,2026-09-14 17:12:35-07,3,146898.948012
+25b550c2-f1da-5eb2-b6d4-d124b65716b8,Tiglath,solana,5b1Vtg2wpDx5jnzgKDUzwiRd4eXMaxLR4gongxpdvmYR,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+2ead3b00-363b-55b2-b4c2-ecf2987f808b,evilsperm,solana,5BjXmxU9p9ogtUsP6xqxjSsXqd84CqC2Vex4LrvWpekq,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+127044de-66e3-5c79-8deb-7c81f12b1051,CryptoCurb,solana,5hh7UE6i2BtyCvaMMadS71wFwK88JRmtRTfXkjZ3CHvF,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,766,2026-08-26 13:51:29-07,2026-09-16 14:10:09-07,168,220856.762714
+b8069ff4-2c1e-5821-86d6-c2f7ed7e2e7e,CHIT,solana,5ix7TPvrGRJmqN3W7PLk4qpHKYjt2rmsbv5ZsyMJWjhf,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3a68fcd8-01b4-5781-8edb-17c2d3bbaf0a,MinorNeatGecko,solana,5mAHVURoqnEtfeB4o7GCLSHAMcmyP8DNH5HMBA12u6CX,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,1,2026-09-12 03:31:31-07,2026-09-12 03:31:31-07,1,999.999999
+7246d56e-f670-5a40-9eda-8489e8b32daf,Fauji100,solana,5MjPKGe4G2v1hM9PNU4Xh1je8RLWhn6b9Sf446mX38RR,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+a74c793e-c643-51e0-9771-fd955747d246,Carver___________,solana,5r9N9HL7kiH915F2Jire9faFUiPUyLppodCYDWqpUdn8,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+37664cc6-83f0-52d5-bed1-d9692c811a69,Hunter_M,solana,5RzJkMjbB71cEhDa2WUsV799FKpDLXLTAtnaGKDksSp7,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,56,2026-09-11 14:09:33-07,2026-09-16 12:09:18-07,31,216917.052305
+3ced5abf-4690-5427-bc20-c8be715621e5,artthatfucks,solana,5sAQHDFzem7erKy5u3H6zTU8dbrYjfkEzhgn3dnek5qe,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,259,2026-09-01 12:05:28-07,2026-09-15 18:34:33-07,81,652450.836123
+a66a32f2-b53b-5bea-b327-a526898d69c5,pulsix,solana,5vJePqdd6FHR2z7c8A84vps52yXV6WmFZbGJhnwQ8tuD,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+dfabbce4-760c-5bc5-896f-f15c2d7ed7af,caycisol,solana,5vx8fSBiinckLmS2yLB2Xr7dCYzYJMVdfYvJHXo5v4fC,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+072a0bb7-cd08-5840-9cbb-ab02a17b0be1,GreasyPencilChewer,solana,5W6eJ2bgpBFemArsDdcJamQ4jqYSpFWUJoYw5gyHFGmE,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+9493af9e-1937-59c3-aee8-9f69323665e9,coinbubblesETH,solana,5wHwZVDaz2JgB9sBWXMjhzDiVED8dgHE4X6aiwhNNhaP,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+8de0e939-6d17-5e1d-9773-aed5e88d88db,walkwithmearc,solana,5xHTKeFrb33ixP8kFFJWso8eACZGFCSfem626VYwVyU2,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+36ee7b0f-b8fb-5a20-a5e9-c0baea70c7ef,solid_snake,solana,5zqXEEGg3sZBw7ycxx9QnE7nfubobnE8LB9k7baA1R3T,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,46,2026-08-29 15:11:16-07,2026-09-16 13:07:39-07,15,61988.020288
+43bcfe78-4d58-5df5-bed0-79f749f921f3,0xbagamemnon,solana,68rTD7Lwoaz2CETpCqubfjtdC81UyPQwAZRxvDDfnZA5,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,43,2026-08-26 09:19:18-07,2026-09-15 18:35:32-07,13,51964.745870
+5335cbd2-81fe-52c6-a863-2dc084cc01b9,xxxfomoxxx,solana,6bYPH9U4mHq6KJHvwxzRfMGFQEXBRaF3TQkkqcpmo5ve,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+e6cf39b8-3ca5-548c-bd0c-53554382a388,SKXonchain,solana,6HX8rSxiS9HuURNHdyDvEaXmDuhZDXtK2Qmrksip9uAw,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+27247a02-9f1f-5f96-81bf-e1cad2a5b146,BTCwolf,solana,6is8kt5vUtKqASKiv41qc8w2f2UBxS8YxtgNRP27zjJr,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+eaa7206a-b437-55f6-81ab-1bf42e88e554,fish3rman,solana,6kQLEhdp7vMeXP43QhfS5P9SYts56WsKVhKrzTFUwtL9,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+7254d13d-9822-5dc2-893b-99c386e701c1,glabuz,solana,6nKVDppw6yC22RSo8M2ysipU8T9hXfvbrEmBum5zuxWv,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3c2acd07-ca00-54c7-8608-c57452eac182,ecaflip,solana,6tamZE5DpP1Bdq7791eFA8zepnpapMEgczGgEhMNS8fy,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,23,2026-08-27 04:48:27-07,2026-09-14 05:16:16-07,7,27341.810935
+4c7496bd-7500-517d-8b1f-ea43439dd9e2,Sackrates1,solana,6tE8yDsebTJDyDuXtUnujx2hMM2iCoJ2vug3YtxtVfwh,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+297d25c5-17b0-574d-bb58-c3c89374f2b6,nobrainflip,solana,6TkTCyQTqvTqAHLzghbFByNZFp8dxXnQ2trjE1QoHmUi,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,12,2026-09-02 03:43:23-07,2026-09-15 07:17:02-07,11,5040.415479
+ec042959-cda9-5842-bdb9-15243c4a110b,IronmanAthlete,solana,6TSusVZDiVTbwFZocCRt3TD9tPXL8Y3mJQWdBzKLbHm4,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+0540cdd2-1f90-523c-9e86-dbd11d87c1cf,uroz,solana,6TxAKuvEsQPdM1J1i7LaejijCGo9u7xMt6FyUdeQARRk,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,48,2026-09-01 06:58:51-07,2026-09-09 13:13:00-07,12,181944.954779
+b23c11c1-162d-558d-9f2a-67f738a221ca,sigh,solana,6txu24mTYARvUGJbfy5qzHiRFvVqDHFCX4LNBhpWLeSH,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3966a85f-f6c6-5a2c-8a0c-91686c2795d7,LoomingUp,solana,6ufpp2kjGbosYP5Bn3T6tNfa2ELUgF2RZRMy3eyFmGBZ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,47,2026-09-07 14:40:15-07,2026-09-14 23:22:48-07,7,15720.559411
+4a077f9d-9b5c-5cc0-8251-faec529ee50a,cocknbull,solana,6UwshFmnnqpoAt9tPVUWs4gpnSCqsTkmnSMunYcrDKHj,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,39,2026-09-09 08:34:33-07,2026-09-15 23:36:21-07,19,194527.719766
+9e953765-5056-5868-98dc-590e46d24cab,Roveryaps,solana,6XkGZFbSusrc7uUEQFTpbkjLpzQ5Q1JovPaZQTeBzZHz,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+254245a7-575a-51be-9bc3-090a924789eb,starcatcher444,solana,6xmMW5JPSEfeRuNdkxixHWsm4Sf57SdXybA3BdwZzrM1,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,361,2026-08-27 17:23:04-07,2026-09-16 14:05:20-07,36,141365.772240
+07d5b8f0-2bf9-5e49-be7d-1b9abe585497,zinger,solana,6ZknnY47dZtxJJGkHYhJ8ikbD6sm5Q4HZRAq33AvtRu6,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,383,2026-09-10 22:18:19-07,2026-09-16 14:39:27-07,69,106671.197352
+28d80de7-9afa-50db-bbda-b8978cf5fd88,Cryptobarba_,solana,72PgQEHGtfxW28G36RA8MYJ1W1Eoeu5Mj55jUma8yQ2S,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+0f5518f9-c19d-5172-895d-8a31287160f1,Rolf_8125,solana,76dTKuZ9kFtJYc8s8KSsvbJizUz4eGBVHHeEcygTZdF2,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+5bdc6103-cb6b-5958-b817-6fd30bb3e44f,SaintBogdan,solana,76JpzKBniWac8rxoSQXspXvxxijjRBfsspRbJWqfEn1t,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+e503c4d2-ae04-57db-83cf-1e297a87608f,Nullnvoidcap,solana,77fWCjygYntZTJNcLxTAGqe42wJyrtpkG8boqUPVSEtf,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+540a905c-39f7-5521-b31b-0a64456e6a5b,thereisnocakee,solana,7Brhm4jMsoam3XQJ1jY2YHe5sSDpWEwpjbP7NHQLivUa,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+2b6201e8-c026-5d96-9999-836b66a2f4f5,balea,solana,7c4nYcvUGAMwoSbMMyQebsRdHvLGtMZnjMVFiSxA26s8,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+bfca6a70-8494-53e8-85e6-7c2afd53a096,Canonandd1,solana,7Da1YP93MceCQGfWxxQNUEFwLmh9oGWrutXD1zstMm4x,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+f478c2f6-e644-5ae0-9c7c-20fbbe21baa2,UserzFN,solana,7FoAE3Nf3U8wzthxpFsXm5ZmkhFgTXRYJs3821zvvAwA,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+111c6c8c-e994-5b51-b235-dd48ecddac9c,plottwisst,solana,7FPvbG2KAnSd5bpcdt5ZX638UhsvUnzafgmbLh3oEvND,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,146,2026-08-28 15:19:46-07,2026-09-15 22:41:39-07,41,90317.269749
+1ead0107-51ff-5211-8080-b88730a2c67c,trademaker316,solana,7fXsnywGzNKhznZhKEpS83enUrBZPQpAShpY4qRAuFh,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,25,2026-08-31 10:42:29-07,2026-09-12 21:19:45-07,8,2931.610922
+3d5ad81a-27cb-5f7f-921a-0422454a5b3a,lunaei11,solana,7juxshRBhntSZqfhZHec6J2UMDfbmBFiX5QD6RRjnXNF,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+28c5dfaf-3254-5f6e-b8fb-04251f782130,ejojojo,solana,7k4MwfDA4bwjdc2HUe19eP6RtydeB33W3YijT6FpcDzj,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,199,2026-09-03 14:05:17-07,2026-09-16 13:52:26-07,83,48602.775834
+02dcfd9d-3f10-5d0b-9910-e1c6883161c5,padbaq,solana,7kHcaeF9cGxmAkRetMKrWd5P4Fi3y7jqvbnFC8CmCjDV,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,15,2026-09-11 03:55:35-07,2026-09-16 09:39:51-07,5,4462.236388
+89afcd39-7d9e-5f4d-90e3-51ba01bf17f3,Xylus,solana,7kmPjz5GuJEucAq4jR52Mp9ySGi9JqnMtY9QrNZ1ujgu,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+6235a769-36e6-5f1a-8a70-6203104a8239,T0NYIsTheName,solana,7QVr2o7atsFrdniZj1jg1FBfKqTWHFWZ8ePoLvbmvfht,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+4abdcd62-6f1a-5b86-9b48-2d15deb9a1f5,ericaarnio,solana,7QY1JmbrfKkuTe4GKX4yiQ6PueKM4q12wuWdto2Kto23,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+19624525-133d-5f1e-9660-3a89f7cc0b9f,pglpiguet,solana,7R1NhhTSj9FdFUekCvXgPN4c6hymvYzv445GJtd6pxBj,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+1d6383ed-dad6-5e93-8ad1-896ff822c781,AIR133,solana,7zxSrTVvoMVTRKr2yCnd4fh9eEWquxGPMjTfdKXL6jvr,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,60,2026-09-12 10:05:55-07,2026-09-16 10:17:47-07,13,57807.407958
+0540cdd2-1f90-523c-9e86-dbd11d87c1cf,uroz,solana,812JAmbamKoGSSDs1R8ZvWT9FmebGpNxHGfhETqVqmMd,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+27247a02-9f1f-5f96-81bf-e1cad2a5b146,BTCwolf,solana,82waJRyAcxDDJJnDGbd24pLwr9Z1BbwdGANaUkGu832G,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,142,2026-08-27 03:11:20-07,2026-09-16 03:55:24-07,32,372395.952801
+701fed53-ee0d-5eef-86c1-fa7acdc27a67,KCh8,solana,8359jAZGXCbFTjiK4KS3YayHNRjFVCY6LL37DA9M7aFG,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+5a425a9b-df1c-57cd-8aa6-8d74a5f1c925,0xkrishb,solana,8D4gEDSmgL7QpHGezez5UAoYKJkdjs6yW5abBvmrs16P,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+119380c2-783f-5866-acb1-e71ec991558b,RareMidGull,solana,8Fjar1kKNq28DfMtLDEbPFeQ21fSUKFdeKUwDjMBGd9r,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,6,2026-09-15 13:08:21-07,2026-09-16 14:38:56-07,3,5328.434989
+00506d4f-4bb8-5820-bd62-1d56ad8deadf,cryptomocro,solana,8fuFGqDcr2nj1Athn1at1kCBc34w1SWQHVZJWXTWZgdL,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,55,2026-09-09 16:23:21-07,2026-09-16 09:02:59-07,17,11529.744270
+46b8c9e1-3955-5744-8c98-0f37820bbba0,v22nik,solana,8GMuQQUWTfP8fuHoeS9W3Eme61io5my2KhexGwQT6xbF,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,11,2026-09-13 13:30:08-07,2026-09-16 07:22:38-07,3,44256.147959
+08e39d59-bcc5-5172-9186-5b9b8c03ad05,Aohata,solana,8Hbvk1ppxdpuXSWUf9Rn7txudToCBmZPAKrYUhYtqj3m,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+1e1243c3-4e0f-5b11-8674-cb571ca24013,crypto_bull,solana,8HMkhRT9h8PqdjABezyNz25G5P23AP8pDhw6sMNQwLuQ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,3,2026-09-07 14:22:10-07,2026-09-15 07:26:32-07,2,2863.694983
+09ecb09b-d68a-5a6c-98f4-c074e29c02b4,RelaxShrimp,solana,8iUjQmHfoo9BTqh1SqcRywSHDJu9HEBkQmhQL1VNnh86,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+3a79f744-b915-5e2d-8c9c-7d1127bcd184,8radly,solana,8KFzB7o2a37EXQ9WM5g1F9GtAEMB2aUVHMkGU3ZHPEx1,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+3fe3edca-55a7-5480-9193-0c90934ab79d,vader007,solana,8KgbU7aUpzPkfuxJTXDN7WhxmHCT1BSanmQgtptpz76x,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+711bb287-7c92-5db5-8bd0-423622d05206,horseimnot,solana,8ks6a6bj1Lq78TsdDjA12VkD8nFgJtP5FFiyX7o39WCW,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+31fbe34c-aa56-5a91-8e99-bfa509b8707e,calloutcapital,solana,8KudshjtE73FUhuK8hMc1m4v6dew1mSF6wJwgk5GMyMb,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,22,2026-09-06 14:58:27-07,2026-09-15 05:36:56-07,5,37011.068605
+19624525-133d-5f1e-9660-3a89f7cc0b9f,pglpiguet,solana,8MKihxyYQefCj2bHhQ45MtATwwS5hKUh3r8fB42sp9sR,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,143,2026-08-27 10:06:10-07,2026-09-16 14:17:29-07,73,62170.103038
+9b1b64c1-eb85-5fb9-83c2-7015c9252801,MomoOnChain,solana,8nb4Qn8y7QjCtWqYfbsHSQAvQ3a8tWURSwQ4fHSTVybR,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+e33f4c53-5ee8-5a74-9999-b4a5d1d1916f,xach,solana,8NuVQbkZXVFHQnqGac1dyehE5zfZuSSfGUS2hKEkSG3x,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+1c657132-196c-5aa2-ad75-cf99027766e5,rh0dl,solana,8nwBaU89BJdF5RuR9f58B7ZGnRqRwHBHCriiRfkKmSmj,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,76,2026-08-31 03:57:14-07,2026-09-16 13:04:27-07,19,36412.344592
+0fb4ad96-d157-5589-ac97-ed6985546842,gawon,solana,8PgKC22ZbWJtcpQGAYqTKqmTCNGeRa4KUamnY91oRDnL,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,16,2026-08-31 04:01:18-07,2026-09-13 12:40:28-07,9,14810.739736
+cc769836-c5eb-524a-815f-d7d632719365,humanbeingET,solana,8r6zZ8qBHXRNg8U6X2Qn5nUBdrwqxNM4akmQ3yDkmGZ7,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+20bc8fff-2b5d-5dbe-9eac-58d70066bc2c,chosen_1,solana,8rtyuY3XQKXFaZbs2a35yQBbdLWbkhR5Aed4GaJHe2v5,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,84,2026-09-05 21:59:49-07,2026-09-16 02:38:49-07,21,190348.086837
+91e4f1fe-d468-5d4b-92c6-1c2cffb819f8,ovoimballin,solana,8RZrM3Nd9wKCXyKzPbMW7SmVPXyztUCLacsxiBJKyssm,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3d75a48c-3099-5566-802c-307c01d656b3,quakerrz,solana,8tphd2joV1ssioBwjExKdvP2mXPKX4GD4nks6RPM3gVD,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,7,2026-08-31 14:09:38-07,2026-09-14 09:57:37-07,2,12951.474399
+afa9b8ff-a5fb-589f-be46-66c439ada0d8,BarBarrBinks,solana,8vgD9PJBKijKLTNDbU8AvjX3UQKDUGFKTdbMNDtSDwCb,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+08877719-9923-5d8d-bf45-3eaba9453c56,happyquala,solana,94abe4YNmpUDCfXrS92PnWCQ97F7UGNuWhUxsKZCXhMy,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,123,2026-08-26 10:55:48-07,2026-09-14 10:31:27-07,51,137684.966760
+acec4e33-a41f-581a-82ec-5f202537771c,LeopoldAschenbrenner,solana,96Kazv7bKy9mfMJ4tWuMPBu4Csgs59n51exsake76DMx,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+c7e72bc4-45ab-5915-a19b-227c8e7d451d,NaztyGainz,solana,9AntEQzUXLFPxsT8DBM662pfS8R4TgHBNU5LfvL5yu9,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3a6715eb-492b-529f-ac92-8ce75aff8899,unkownwallet,solana,9BP6AiyZf1KyXgo9L6wMsrjaWFNSY9kTBuXswZQKN2Jd,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,7,2026-09-07 15:23:42-07,2026-09-16 07:59:57-07,3,78202.802423
+68d688b6-de3a-5331-9c62-ee8256b135e0,soko_eth,solana,9CLfSGyEvYb1Ab6fEDvYauHHhWR4XnYaXav7cStaHXrw,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+1d701fb2-7510-5039-ab70-be6d6784b16b,DanDLi0n,solana,9eYRqgkhExqZTVn5MfbEBJAtJduKkjqS9XojfgUYSbNi,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,3,2026-09-09 06:39:08-07,2026-09-16 10:52:53-07,3,631.304698
+234deebc-355d-5ee0-8f0e-f3c8bb79690e,bigslime,solana,9GUeC76XUTbct39mdNy6kHs7YwfrvwdBSe8tummTm5sT,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+009dcabf-bc66-50a0-8eee-7447438c7ae4,beniiiiitez,solana,9h72s8GSeheVumfd3DatUaaVUhqY7XoMRtqbtYTwUamc,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+870f2bdc-9d55-578a-8a83-db4f93ff439f,FuzzyOliveTrout,solana,9i9T2AwPzuptJD9qYQ6G7KkGnfj4mDpwjPvSMrTkMiKz,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+35e7568d-b866-5cac-9372-3455ee4568fb,khomenei,solana,9j6L2rrNhDJab6Gd1RME7izQdFtsWb49mbZHLM6UBS5V,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,45,2026-08-31 11:14:32-07,2026-09-16 11:04:14-07,13,389771.936519
+2b3d87b8-5a64-5a33-8892-7f94a9f1e221,OTIEMUSPRIME,solana,9LCMQM2NzaZ7wMLPRVXCunYpvSBrbTzeosrN5FLByw2u,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,116,2026-09-09 21:12:04-07,2026-09-16 10:42:43-07,15,12788.282130
+ece2c907-bbcb-50e2-bcf7-49c9bb7ed3b1,probablyinsider,solana,9mXFLKcwawrpj98xaUnrTaGsyXSxeyj9RGNgkgbJhvWR,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+10f1faa3-7385-555e-95c2-92c56b9c0552,LeftTesticle,solana,9n29Tj5ktadmtJAm1yxRWGQY9mBNhNoNMZ21YsYkbJTh,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,19,2026-09-11 04:33:53-07,2026-09-15 09:36:10-07,4,34616.769365
+065fcbaf-c579-53e6-86ef-b1271eed7397,bul1ish,solana,9n8nbGxkKvFGMEjo413icc1W4GyhneKdJ3K3Rg4pE1F8,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+0e8efa85-6957-5e99-8b40-c962cbe507d0,xfilesboy,solana,9oC3XYAs2oeU39NeNFke8m3JGixMq7g8PfANsmsbKR8W,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,448,2026-09-01 06:33:06-07,2026-09-15 22:43:50-07,202,598287.124265
+5c0fc79b-c204-5eea-b86a-f0ed102e36fa,onchaincutie,solana,9QWZhySZ3UqXR6pEfk43w3w8c8udGeLv8jcvWjgn1cCH,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+0157fba0-294a-507e-b89b-73ea70879e56,shiprekt88,solana,9RdrirxpsZHx7PVCKZyHRnKAD7wbjYMFpgmDjgL68fxr,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,299,2026-08-26 09:53:13-07,2026-09-15 10:04:37-07,11,1139812.664500
+36be4b37-1c35-5efb-8784-ec2cba7f5653,adam2,solana,9rha8X16Bn2DAwSD3EvthPau6cXftn4oCqm9k25PbMY7,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+f2fafc1c-1af7-58a6-9806-b4210ce382f2,tgm2026,solana,9rob2Ed7ktmd25qZXskPirdJoHVjBoWVKB2g8XzBQEsf,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+9cd9582f-8276-5487-bc00-ce7171287b16,zackory,solana,9UPbLxA6m4281np9sX7jPpXWud6j6EVX6yduCsrCwak9,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+45708bac-3940-502c-81bc-38fd8ce0cc87,redtard,solana,9VvLwzuVAsHd91AVkiU5GHnuN6tBQMfuB6tSCgwMLv5h,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,112,2026-09-02 10:48:18-07,2026-09-16 10:16:51-07,39,72410.891643
+f635bb39-de83-503c-912a-6702604883cc,NovelTightGoat,solana,9XwaDFQ6iJ7tfnp5cD7zKv4yE6dhEKuSnzfUvvCJRNz8,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+21e6a3b4-dac2-58d0-9267-3f2feb864142,johncook,solana,9y4tc6N8oSM7G9Vht2S5hCgdgatPucuVNxpL9AvNv2xz,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+127044de-66e3-5c79-8deb-7c81f12b1051,CryptoCurb,solana,9Y5EwVnKogMe2HCBbdPEDg4knwUs7SyJ7ytDjhAV5nEy,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+35b737ca-ad70-5c13-a93c-d29b13ca8942,DegenTW_,solana,A31JDNSGSocGhup7k4aZCoAojcZKcFXPxya5dzGcJbbL,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,6,2026-09-15 13:13:10-07,2026-09-16 08:17:49-07,4,8037.221633
+ff76db85-deb3-5b2e-9a4a-c3cd0541e9b0,aiwass,solana,A7AUaxchgmmimzEUeFc1T9wfRcpBNFCCfYH6bNdhe6Ad,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+22738700-0a86-5fdf-bac1-675ede2ce7ce,Laspana,solana,A8ke54ymJHQVkht9PszcTQSor7gacjpDHtKacBvcKTCn,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,394,2026-09-06 06:31:21-07,2026-09-16 14:06:47-07,105,127954.294757
+c361968f-a6e8-5812-b9a3-452933500894,kakaka,solana,AAaKi5pvGRGXCufRKmdNMCUP2bS2G8bRidwaCggfb3dY,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+267329fe-8d16-5bc0-9e4d-2c2eb923b1ac,ATMZ,solana,Ac1Y1eSNPquGnWK383rdtZUuu1K9ikRebgGvNQJU4muK,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,349,2026-08-28 20:39:43-07,2026-09-16 12:51:28-07,124,156143.031636
+331edc01-340a-56b1-affc-fca7b83c55a7,riskanonymous,solana,AcGHtzrgKEswmdkJGKz2jht6SkiZh74hVYy9J289gj8b,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+0f7765c9-3f1b-5aa8-a7fd-b0beba582d2f,memeplayer,solana,AcUJM6Aq6M2aojWiit7P2Ed48VN6k3XqJG9gT3datSss,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,273,2026-09-06 00:56:23-07,2026-09-16 13:02:37-07,60,200683.299653
+370e4358-1feb-5783-a142-bf77cfea5d17,xoxoxoxoxoxooxixoxoox,solana,AFAKRtKuN773mt4E4E2kZkuBKxoT12MGKS77ZFhpbmjf,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,954,2026-09-02 07:23:43-07,2026-09-16 14:47:18-07,413,164499.534021
+2ffd5d38-27e9-5de3-baba-38b4e9941717,ConvictcivnoC,solana,AgDLK5Hp1cvzQcV2uCrBLGuQnAbK4LHPM6DWQTbzbZvk,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,488,2026-08-30 16:52:48-07,2026-09-16 14:25:40-07,30,154665.833854
+00948214-04e7-5591-a4a0-287728fffc99,samsrep,solana,AHfpFJ9Nrz749AwX2hBgjXZxU6LmUGZbWjuJxH6cHTi3,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+1e09dc93-a7dd-538e-aaa8-98ee448bcdd3,ImBrentJames,solana,AHgfahqfdE4BgiPPRTGtaMtqxN7pyB1t8b6tvzVpo1Rt,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,434,2026-09-10 12:11:10-07,2026-09-16 12:05:03-07,20,612475.447624
+86c9d6c9-7784-5501-81de-722e9abb732f,infrnce,solana,AhW96wTrUfAciLCMdNv3v9p29wP4GbFdp4C5VbYa2brD,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+08e39d59-bcc5-5172-9186-5b9b8c03ad05,Aohata,solana,AKbP3LbxFFaE7JXTfTh2FTiiVjEXazHbgjp5dhDG8rvp,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,2,2026-09-14 04:31:48-07,2026-09-14 05:30:37-07,1,1713.317345
+1f2cec1c-46fe-5937-91ac-d261996c09cf,chopped_remus,solana,aKmaJt9FWsQB3TqgR4sCJo5XksrkE7JDb7renvns816,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,118,2026-08-30 17:52:41-07,2026-09-14 13:54:56-07,34,60758.718705
+1a2e9e29-1c18-5b56-85ad-c824f8c95126,claxxerz,solana,AMjXpfpmrYmuU6eCwHpyLkGy6MzD5WTh9pGoJJYFF8Qr,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,27,2026-08-27 12:37:58-07,2026-09-15 20:32:37-07,11,36875.849248
+4e1269d1-51b3-5835-84a6-9a6af0f711bb,Bouayadi,solana,AmXXJPRuXQNKtv43ncSoUELurerPiVu1UG1fGHx8eWqr,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+1283f0a1-8e8f-5d05-8c4b-442f011a4756,0xWives,solana,APt9C3YLHL5Yi42ggwoMKyKoui8KxXjXfsNiNfDFJzCR,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+ecf187ab-1cc3-513c-80f7-1b18135bc6fa,ManRay,solana,ArDXy6qSUbpstVMWw4Ew1HzLHkjMytkKT8xQ3ckx8Wrn,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+483a0be9-79ec-544e-947e-9fd6a9aee630,leo919,solana,AVrYw3biN24vQcrE7u4JSNKdY5neQGEqb67jZ9wFycaH,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+393b83dd-bdb8-53af-a44e-932f374214c5,NTHA,solana,AxKRBW4v6RdJbiSdcVkaJctFmECx2TKTT2jftw9xSXyD,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,24,2026-08-27 16:15:05-07,2026-09-15 14:56:30-07,4,28592.227447
+df633f03-2da4-5f30-abc7-5d49b681f832,JarlBalgruuf__,solana,B1Vm2HgjhRC8UYtg3FKXciFNQBjKMLnxqHMFbuAGipE9,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+117002f2-19bc-523e-b15d-18416f195dcc,dogoyimreally,solana,B3cvDGdyaz3RayfZS3rJJjxmYRfVJcqyYorfxvB7bQbd,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+4e1269d1-51b3-5835-84a6-9a6af0f711bb,Bouayadi,solana,B8f9Mg6fUoqWbYqnCrW1eztcH6wF91Dat1zhhB7rzG83,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+6eded5cb-8146-5627-9112-8e954ad3756d,OmakaseOnly,solana,Bas4cfqXKLANG7gp1ptbfmT3vTHzdSpRde6USk6FF548,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+42ff7f8a-8a7c-5632-a1cf-38b760fba6a6,b_moni7,solana,BeYnS1Nd2Mm7BJgQvjixeh361TzKetXPUBvURAqRUzoS,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,9,2026-09-07 11:39:06-07,2026-09-14 18:51:39-07,2,5250
+4c845c68-c002-52d7-8d7e-87d21b261443,Bullrun_Gravano,solana,BFeDNYrAoj6KjaRTWX7JVNKLoD1wTZANS8puMogDxsY3,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,287,2026-08-27 08:13:13-07,2026-09-16 14:24:23-07,83,129899.934233
+1377664f-a5f5-5e26-a07e-34cd0914c874,QuietlyHere,solana,BFLFviMFWughsYZ3uwxfgVxiSbZ3Mvj8MKYz64qkgVjs,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,22,2026-09-06 20:15:50-07,2026-09-16 04:08:18-07,5,18122.244186
+8365c7b5-88ff-5553-a261-9d9c6f210a17,Poizerr,solana,BfwYS8JriGJkfPuWned72Li7EFNprcG8EykPQCy35k3k,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+94149b1b-a357-58dc-8205-28e1f19b3f8a,hihi33,solana,Bhkhub5XjRTjcoG4FnCgfNvymdhan8ZXTTbQYXfhf9rv,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+59012041-8281-59ef-9837-e2d18d756226,Yourpop8,solana,BiX1gLe1evzfX2TtRVecdQmc7HXvfENBuHijHeJ9JNnE,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3d75a48c-3099-5566-802c-307c01d656b3,quakerrz,solana,BncpJ3BZFqLLYp84QrzJykrLYQhDmx77vzWbv9asccnR,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+49bd328b-2877-57e4-8f4b-107e07fcb577,HeecticRL,solana,BnHDJMNVxixBUDDPfDaM5A91dsNLXVheRyKuYGKYEHpw,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+14fbe50c-3913-5130-bcce-3ccc045ea909,qapitalist,solana,BrrJR9vm6KKxE6BxC2dP7jDyr9CzpJgEnroeZ7HpGpZR,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,4,2026-08-31 01:52:36-07,2026-09-16 12:56:47-07,4,5848.479315
+ef3a73b0-87ce-5d34-907a-5037e8e32dea,yumiebb,solana,BTraiihZyPGjXPGPPF5NvhMXbNmoVRTJ2MayZ7LS9eDY,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+4224fb30-d1c3-5338-a74e-17ad54019b6b,Chanzim888,solana,Bu8VQP3r44STzNEFPNPLNaxHA8qDrDtA7HiM9seJK57y,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,187,2026-09-08 16:24:43-07,2026-09-15 18:26:29-07,69,127961.755079
+97600a00-9b58-52b1-a757-4a49795ee015,halasfar,solana,BUA46KwEyWgivZsQMjzExPagE81JDewA4cvzzjvj2FQC,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+4293991d-149c-5223-bdee-4fb88d52cf10,trenchtomm,solana,Buhovu9H2f9MBsA9KQWvZLnd77v7jpTfp4tkqb4C36sM,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,33,2026-09-10 09:06:55-07,2026-09-16 14:38:45-07,12,50093.726623
+35b737ca-ad70-5c13-a93c-d29b13ca8942,DegenTW_,solana,BVZzYdMpqbckvQjvG1SDSSELNXGAZiLG5JeMxcvgmnb3,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+3f71b45c-7937-5aea-8c85-d601334a1014,wenmoonler,solana,Bw7kfo8A4zBGk3eHgtGftggwD3rt7VZcYCqLPf1jcKzt,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,101,2026-08-30 22:38:08-07,2026-09-16 10:18:09-07,18,125777.110651
+fd44ba22-8ee9-50b7-84c2-df2cf77e74f8,killedmyselfeth,solana,BWuiYC7dQ1XseP7dDsY83AU2nFNoP5dyBjUri5QDsDeY,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+036643a5-a49a-5c74-a8c0-14d766df398f,shinigamii,solana,BY9NubiNVuc5dx9wf7FhDQ8QTtb4sGqjdsvv7ByMTLPH,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+da26c0d8-fc54-5e9c-a07b-a2fa843723fa,watchingmarkets,solana,BYdcTWAaD3Ct3wFvH42GsrWNDt3ZEM77RLgnRn37zqxA,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+0f726171-4370-5c12-b297-5d545fc95a81,jebal,solana,BYPS9jpW2UiFrS976Z7C9NH5qPbsmzgtPK5oGEd3fCRM,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+54f397d4-3f5e-550f-a084-5a3a67bd250d,duffls,solana,C2e2zgEn8WYApRDoDYZ8sgyCAmMFZhK6SMQKCFErtLAK,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+0fb4ad96-d157-5589-ac97-ed6985546842,gawon,solana,C3GeA5QBMzUMxDW5GVc72xrhSWT8jYHZz4MYSJ95RZAp,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+7229a442-ec9d-5dbe-89af-d8dab9b5eddd,Fren0x,solana,C3miB8MhhMwpCL8Xpa8bMSNK17AnujvMEc5KokmvkuRA,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+e173b72b-9e3f-55bc-9552-d61e962d7e50,GotrillaGorilla,solana,C5mDYuT2B8DbrtRG85prSLqWGJ9x2wMiaYr9Eb8mBiZU,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+f338cc20-08f9-5261-baf9-2a772359bf86,ComebackTime,solana,C8tEiTmthuEJFrCy7i46QMYyYQCxwEL6fNMCMrbvKiz2,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+4ad10aab-d153-5ce1-9daf-5b456a7c4afa,sicknasty,solana,Ce4sJzDH28RjdrFXrQsScdTqj5sfarNGkMnpDDXeQaUr,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,21,2026-09-06 00:32:30-07,2026-09-15 09:13:52-07,10,15412.355477
+0ef798f5-6af9-5d22-b8c0-dfd0f1f8ed6b,legolas_link,solana,CGaTaedyUFbdTZL7ASaQ8KDtqiH6Ti3ktFZcriaKG9Vp,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+28c5dfaf-3254-5f6e-b8fb-04251f782130,ejojojo,solana,CGsr1r7E99wCSUL46C1jqHEy545tSxpzCVf5gUXPinso,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+b6c35382-a863-5f82-a719-910aabf63ef9,mcbem,solana,CHbQivGJEbo2eey7LmmeYZ5EHm6X7RL9J9EedQEqcjBV,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+68d3f8c4-f5ee-5021-b8e6-cbc6bba4f963,fey,solana,CideM1MQy6rdda2wA3pr9wHgGeogfQtV1eWdUEgwwbsN,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+455fe58f-20c2-5d96-8f06-0b438905878f,onchainshifu,solana,CjNpZJvfs8jjdTHEhX1zKn9BNfYz8fTwXooYzTtxYwc4,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,38,2026-09-07 15:01:53-07,2026-09-15 10:23:56-07,16,3601.178761
+0ff1e96f-da8d-558d-8941-62f1e316876a,thebiglong,solana,CLUgneaRNbEbuMQY21my76oQtHY3GhJKLiRWmaiaxHWR,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+283d4bec-a95f-58ea-9040-75bf9a4df53f,0xKimJihoon,solana,CmaN5NpKdaAUJZhcA5LX4MBYeW3BBD5Gvsn8333Cuai7,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,25,2026-09-01 09:38:56-07,2026-09-14 09:30:52-07,10,50344.040834
+02680b32-b5e9-5a86-8780-7480a8909ae2,coringtonite,solana,CnCWqm8b7PhGsF4CQ5vZLzbKmUi33eg5aTQpJyTbEwjC,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+897c1154-d5ca-56c9-99ce-a7507057ee80,3ethtomoon,solana,CnhQ6fR1LcX7LrGQSURTRMdyEJgxrTvRnszcKpUnHWyt,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+f782bab8-96ed-57b2-8a5d-a047da4a94f6,ryantrost,solana,CNQbLP9QpTCCNFG1dVVBSKTiA27QexcL4KSsrcJUL9JN,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+3fe3edca-55a7-5480-9193-0c90934ab79d,vader007,solana,Cny7Brip3BgLYJi6MWn3oNw6NQvKQH25xSjFkKE2Ax2J,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,179,2026-08-26 06:24:05-07,2026-09-16 03:09:15-07,43,138048.846242
+ddd41488-0731-5186-8041-5091860c592a,airtightfish,solana,CQS9RZZvrBLC5uX5NhxwYEu7wvLtBpojvHbDgGFDu4bY,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+04f299a1-84de-5438-8d2d-0cf0e2a78c93,behemeth,solana,CrsJRV5KQLiJmznL5WQJUnRRFLs157CYj26u79BuCWBz,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+0f726171-4370-5c12-b297-5d545fc95a81,jebal,solana,CRXomDFunLoRm5N54TyxCxAzn6NJtvnjKvuxudHSV68U,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,36,2026-08-26 12:30:10-07,2026-09-14 12:17:25-07,7,541760.965746
+20fd98c2-1ba8-53a4-b71d-20d1f28be44a,wiredhikari,solana,CsJ1uYJPugNGg1wtsYrBKGnaMaQUnQYX9DBqCgUyM5up,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,165,2026-08-26 09:26:08-07,2026-09-11 06:40:09-07,40,46996.415513
+bfb88269-5d58-55a2-b383-dcb547033f2d,minebuu_,solana,CtVSgd4ivuDUm6WexNymZHBt1hxmCW7jsoACMH9fJEpF,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+1ffc85ee-ee20-5e6a-b32e-42809dd532a2,metacinderella,solana,CVfyypa4rLTGqcv1Zabj7xqQmMRmPSTofdsfSi4taiSc,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,589,2026-08-26 05:09:10-07,2026-09-16 14:44:57-07,182,197535.400256
+4691f8d0-7314-5f45-8515-a2f048de2452,Minty1xx,solana,Cw28JvNGKWX3VrEtSyLTJvmeskbcH5bJjEy6mGjAeopi,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+d5cd4a29-13fc-558a-a59b-ab43b9643ce5,tibbiracer,solana,CWbpTvQXevVJdYK59DKgjtJfqm83yQFs1KScm4pHHmge,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+2c3ea464-c456-598c-963a-e1a335f7d1f3,justtmike,solana,CwXCqac6aDVstMKtqnSWq9Q6vt9pRdBJGGak8LyF4CKm,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,181,2026-08-30 07:24:33-07,2026-09-16 09:22:38-07,54,184554.720829
+93b8c6e5-9795-59e7-8c79-77b227f78fdf,Tekkerrss,solana,CxVjCVvSw5W8Sc8fXARCd5cAna1xNGopDmV6D8oh42B1,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+b84de5c0-0444-5f8a-8345-f12931bc4c9a,IdealSorryFlea,solana,D5kVSm5gAJRWE7gugnx5QqTjmyAqhw6toGVhuwK9h97y,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+c72fec90-9b72-52a3-b717-242a9645c945,artofprerun,solana,D7jYPbrD61mvhrzG5oAc9KwGXjg3449uZYeTCi9jzBqd,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+37856743-0f5f-558f-b755-42dccdbc2c9b,bigfishycapital,solana,D7rzuFSYrXRCyrJCZEkmvgqKjuw4UW29bdwCBnHVFwAk,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,145,2026-08-26 15:23:00-07,2026-09-16 08:04:05-07,37,76066.053218
+49bd328b-2877-57e4-8f4b-107e07fcb577,HeecticRL,solana,D8i4VVvZEcFrZPZRtSm4cuT4LaaEKZFWTUE1Xy6Tr45Y,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,39,2026-08-26 20:06:16-07,2026-09-15 18:33:52-07,8,42980.449715
+225650de-f1b2-5d3f-a872-8c1c12c1a793,socrates,solana,D8kBqVR2VHTCd1LVxBpw7DLugMcKQooZugMZHiEYmK79,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,1,2026-09-12 19:36:08-07,2026-09-12 19:36:08-07,1,1317.33835
+2a4f1054-b9b8-5829-9c80-9bf3961ff342,babycakez,solana,DAgjN2G1G66X2snw46E6RxErfkqAamZH668byZxckmtd,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,253,2026-08-30 18:20:07-07,2026-09-16 14:38:45-07,43,464146.674306
+693899be-19c9-58c2-be6a-33907ead0564,asswipe,solana,DaRHN9JqKQMCVPJ5EERab94q6nVoRRgNeEEWQ77xCa4t,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+75eef97e-70e2-5304-ac3e-0812afd7fb92,Erika0616,solana,DbAQF56ur5YC8fut2XJhfKX7f1cfrpSQcCZjWtkC9Ebp,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+75b7f84f-3848-57d5-ad3f-77263cb55a2c,nazeoppa,solana,DBBxEkoqQ2a7Tr6HPrzREoANkiXyeQTqVd1SM9efv7yV,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+ae60c690-3cda-5c7a-a654-fd92704d22fb,whereisgod,solana,DBtiPYup2JtgTeTfM3PrCmfbpGtf9yEsR2wKjGiBahuR,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+7776f175-5d94-5f62-b9a2-1d435b8cb5d1,Berboche,solana,DD31rFHrbKaGwzjQgC5m5pcyN7ozrymnHMcZPc8E1kro,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+0579798d-4a8b-5fab-b9e9-593172d49326,exulantis,solana,DdvAwhPFBAcFuEuMdFgBbek1Spme5ztKQ67f4gA9NHvp,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,133,2026-08-27 23:48:50-07,2026-09-16 10:21:07-07,66,295178.070599
+c294f71a-cf3c-5b0c-8bfe-1b8b8ca18ce3,WheelerrDealerr,solana,DeFLqBz6vGv6WeS1QaJEa5rQv3qtD8oaDHfoqYPikKB8,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+cc5d9712-14cb-531c-bb77-c9b84bc63fd1,gucci,solana,DiGadDsyAq2dhnjjd35KrVB9amtmUhgDjcEyGU5CKNkc,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+2b9d89a3-de25-5353-a631-0b2c12851897,RiskAverse,solana,DjSoVSzsNTVmUVED1iM9qaZJ35WuGS6VbEQASK7exzxk,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,120,2026-08-29 07:46:10-07,2026-09-16 12:17:35-07,50,165742.284019
+0c171d6c-737a-5ec2-850d-7a724441f98a,YappyVocalGoose,solana,DJsZxM4LKDSZEEjE6RL8s7WAT8hUE4gtuuJKooEyhBhw,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,98,2026-09-07 09:43:39-07,2026-09-16 05:23:22-07,37,11882.886187
+01eb64e3-127c-56ef-8e87-1de621bc8a10,tedclubberlang,solana,DkguqWA4bt6JkE7zyLUhM7kfoatFZBPyCxMyWqppRMcp,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,9,2026-09-12 18:51:52-07,2026-09-15 14:41:27-07,5,14151.112999
+392c534c-28ed-56f8-beed-ed454a4fd4d1,XVentures,solana,DNnsNPYz1zj8hhc7amqGz3nKqRufurUEv7j4aYXB5zWH,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+392c534c-28ed-56f8-beed-ed454a4fd4d1,XVentures,solana,DrxBsUd3ufx9Q8kc8Zts1SAavMccrAJcwrFzLf77d9o1,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+63993bb2-2afb-50c3-8eca-cb186edbe849,bigwarzeth,solana,DsoMrMSYzcMuUAR9WP3qjyPj3uo6oVcwjjQDfD8S4hgV,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+71e85f75-f9e0-56a1-89a9-339af9a7c9d8,xbtDLN,solana,DsYscbLsYaWHmrps9vQLEMBJsyGCDnEWbdy8ZSgmWDZP,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+0f5518f9-c19d-5172-895d-8a31287160f1,Rolf_8125,solana,DvP72MTLekbXVetispBd8fHAdr1kN1tSYewSRajJYpCZ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,17,2026-09-11 17:34:07-07,2026-09-16 11:47:58-07,4,13063.021641
+4c42ed2e-dbb0-5e45-8a8d-246153c225c9,Maddog25or6to4,solana,Dwrjq54hKNXggXWaNXQhKfFW9VZS4oSNQomfBnseUzVU,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,63,2026-08-29 22:00:46-07,2026-09-16 10:44:33-07,36,7312.441001
+39ce012f-7fc6-557e-be70-d5b59b3e9d46,Mnysgud,solana,DZuhcnRgFNfxXhmKGJh6GRn8BkfzncMpiN5mBmSdpXxm,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,28,2026-09-11 14:08:45-07,2026-09-16 12:26:56-07,14,9436.250719
+50613952-4fce-5098-99e7-d6814173ccf5,DubaiChrono,solana,E5Au8M8a27cjKRmvLHwhFGeAsm1jUrB3oSsUEipHhmUZ,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+0e52fff1-7bd4-5802-98f0-f679e64c7fda,ZippyRainyMacaw,solana,E9GJ9AL9vCK64G2D7J2Lq2FRiVQVrP5fMhtBriEnrxc1,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+ad7a5a54-ad1e-5170-9739-8f5060cd2ca6,badabeepp,solana,EArbLvWf5xo6JZfVpfk7ANUThZEwMNhYcptP7eKg5qgs,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+14fbe50c-3913-5130-bcce-3ccc045ea909,qapitalist,solana,EayY95XDpBTceLWzSpKjUkhua7cQQPekhukwcP1trp8o,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+dd2083af-4e43-5c9a-8e45-edf188187bda,SOL_IDNESS,solana,Ejgh8hEh85bmqYtZJjrmtthJPH2WycT7E4g4kWCm2qdP,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+c39caec4-ae30-5388-ba86-c4c10b5f2d42,AviFelman,solana,EJuqAcAtgVRp7wZ3K1EZGssvZcA7CBDvKnpz9Mva7gkB,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+80de304f-3fec-58fd-a128-65ccd93eb294,Xehanort,solana,EKYGqLpsUXBmocGjh4EFXFYwNXSm6bi43gD9unqqyTr9,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+02680b32-b5e9-5a86-8780-7480a8909ae2,coringtonite,solana,ELx62umUSwoVy713Mn9z2RsYsN3un7kdrtYi6zVFt11J,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,6,2026-08-26 14:16:36-07,2026-09-10 00:51:16-07,4,4385.314990
+f18c463d-fd1e-5b36-911b-89aa4c655b4e,BonerMaxi,solana,EpdpvLvtjb7Rf4vSDG9PgcdWX26jZPC4H23b328zbsSw,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+6d9a3e82-2ec4-5557-8f70-3cb386bab7f1,brezscales,solana,EPi2uGDEgKYfgVPX2TaoeKveiJ9YyUZtUJmWpFX4uLgf,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+d78e19d7-b7f6-5b24-8c76-4c1ba022ca1c,epicgochu,solana,ES3yscy5Wg8G2ssuSnkxjEqyM7bhqLcUZU1q9uVUj2yu,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+eaae93fc-c88b-5ef4-b705-8509f9d0d812,trademjs,solana,ESpWNf8fnP7G5XW6eJ7HEbRFCfZqiiZSJBna8zawK5gv,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+330b3693-8e52-5ec6-a6c2-1af4f634d8a8,sadcat_gamble,solana,Et3wXDaWrHQAq4HooiYYgxRo25t1UCpkELYVQtHcJq3P,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,23,2026-09-09 12:52:15-07,2026-09-13 15:10:18-07,10,24664.068703
+d44b0cee-15c5-5c74-95c8-1de414b689e2,spartee,solana,Etbg7Z8EMFVdzZcuRP16Q4kwA3mDvWq9XngcLHqGG2gh,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+72f9d920-6631-53b2-881c-03ef1c37bc35,MeanAwakeAnt,solana,Etm9wXx9r8Qrm327YgotnJYtfXSux65aTQ9YCwQbAVQw,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+27000f4b-0bc3-572b-a018-2d6e50c512e0,pricedin,solana,EU7FSVgkt8eZYV199enSCoQa3qoH6h6HP8v9BqpGDeG5,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,20,2026-09-05 08:18:58-07,2026-09-15 19:49:32-07,10,46154.236136
+9d7044ba-942b-5234-9ffd-5c9a4b4150f1,MangoTooGood,solana,EWCsWRg1RAQFLzzzNh16ALWGRqrLRuMXC6M6NBz36Y7g,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+1f3298f2-4dfd-5230-a339-0d1c5e4ab03f,Deafswifty,solana,EWYhbztY43tpadNrk3VrUrvaqctxQEsFUa36EL4C4yRY,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,266,2026-09-07 11:52:48-07,2026-09-16 14:22:57-07,64,68117.833961
+22140383-e690-592d-9cc9-2ac49f16040f,prevaile,solana,EzKDs32Qd396gg48HZKGibvfAdS27KTmcCfdEp6euSLt,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,1248,2026-08-26 04:54:59-07,2026-09-16 14:28:54-07,342,1185632.130845
+4995b4b5-d069-5897-a02a-433cdc357776,MROL1VER,solana,F3MsrweASYcZcAN9mg6o76hef1Xzh7P7qv6BM9acSMJP,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,537,2026-08-26 06:27:55-07,2026-09-16 14:42:44-07,194,124314.480483
+1ed60276-9bbe-5850-95b3-275f9e5c02f0,kans,solana,F5D5PDEQBFfQiczvcvhMQjEcAQa9WXk9LrXAfdj4YE1J,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+3ced5abf-4690-5427-bc20-c8be715621e5,artthatfucks,solana,Fanj7yTsEJXXmhS9vh4rCQjgBpV9zT1S2SYUa3vMFE5p,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+fd296c9c-9669-5c02-951c-2f649c12b459,fill,solana,FARRCfpV2CQbLNZorz8FwjrBGXxYymj3rC9j5bEfuXv1,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+de9521e8-bbea-5386-9839-851c2a4d4da9,allindegenX,solana,FB1koiFFydTA5hPPwPaijQaxHegv1aEFRgM8xHojwfwd,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+0c6233bd-f02c-5485-8ea2-9c8ec3366c54,sniperontheroof,solana,FBQQFimCa9MRjw7cRguuLYs38B8xrBhQPAx4yyHBLLXX,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,109,2026-09-11 20:24:49-07,2026-09-16 14:39:51-07,33,54785.159359
+1377664f-a5f5-5e26-a07e-34cd0914c874,QuietlyHere,solana,FeWnP6z6XwmLef3oDNXkCtoRCjfRofYepNLu4foiXHsS,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+a6351c6a-377e-5bf9-a969-f079f373a72c,nishequantelsa,solana,FfMuZvXR9U8etQKxbmxm3dVsTMfseV7MafhSiuxRquiG,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+a0089c10-01f6-59f9-9318-808ed818db0e,FreddyMercury,solana,Fh1tKH3tw2ogC2DiJiFZFaKkXeZwU4oZTLgzwVzaG63q,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+197fc3a2-475a-5178-9b25-85bdc43481fd,fibs,solana,FhsbQzAJWVDNwaH61cTo6XkkfEsmSYMZKs9VJHH32bVG,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,407,2026-08-14 13:17:03-07,2026-09-16 05:19:10-07,147,507800.824179
+1d07d146-7ed4-581d-b495-3bb3fa7ad111,PhoenixPlays,solana,FjC6L4aoBgqUpihguCWxcUgM7TCPj7Tvcr7iioSfkp6u,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,245,2026-09-03 22:43:55-07,2026-09-16 14:46:46-07,19,301102.715045
+07d5b8f0-2bf9-5e49-be7d-1b9abe585497,zinger,solana,FLaowmCXDQSTZ2bV8ENQx3rANnm5aLCxskq6qyfiDnRX,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+856470bb-33af-54c2-ab30-9c6a3b261976,MrBlacky,solana,FoQ2EQhsm2wsKpadtdK7hQs64zSx6BJNrZ7fwLwAJxfh,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+4c845c68-c002-52d7-8d7e-87d21b261443,Bullrun_Gravano,solana,FrgrXY1RqcvdE2MDyxsgnYcBv8WBiAEWbnJihRFN38cu,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+a1864460-8696-571a-8b7c-bd0ee59692f8,Boynft0,solana,Fs61v16MAZTLAaChGSCmBSMwrH9zMvi44BLHWg5V9YuG,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+4b507fc8-9b51-5d1b-8b3c-b3492772b66f,snipezm3x,solana,FTNunT64dSBT1dyiSmdSyXa2h49QBqqCL8i6hzpxCBTY,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,1,2026-09-08 10:39:06-07,2026-09-08 10:39:06-07,1,211.235763
+020be7c8-bf39-5c8c-b434-fe9d302c7bb8,pickful,solana,FtTPansQcGMkXSutP9q5bj4x87iGYAs75dBCQFtXbFEv,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,102,2026-09-07 03:50:55-07,2026-09-16 10:35:27-07,60,8885.816598
+27651cd1-7181-5f5a-8463-d586aea234af,MannyOnChain,solana,FWnbAT9w4GJRgWLd8oHPxQRjBStaKGSSCVdGYjG272y4,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,37,2026-09-11 14:31:32-07,2026-09-16 13:52:02-07,2,7817.464421
+2a6d9d5a-08ed-5ffd-89f7-3ce7467fab5d,miami100,solana,FYzD5ZZgrYfKURCu8zTiux1Y9P8s8X3WgLDxXNe4d715,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,34,2026-09-01 14:51:31-07,2026-09-15 19:20:57-07,12,9830.483545
+3f77e9af-3741-5aad-a471-4863ee43879f,ParallelAiRev,solana,FzmWspB353bJiqYFZ3jrNr5VXyf5XmjNVRkJr9LyfevS,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,4,2026-09-07 05:32:20-07,2026-09-16 10:51:08-07,2,129917.061984
+22140383-e690-592d-9cc9-2ac49f16040f,prevaile,solana,G1biK1ioodbCMt2wCN75Gm43vxJft2pjdt9z59ACPxZ1,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+234deebc-355d-5ee0-8f0e-f3c8bb79690e,bigslime,solana,G1F1iCMMVgnXLumjhCXKE1SFUn4xPK5SHSusWdx8a9LA,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,93,2026-08-26 23:58:16-07,2026-09-15 12:49:37-07,35,35549.673189
+358a2ba3-9c02-58eb-a710-85ca7f946292,Darkraii,solana,G2ZC7a2uGhXyCE1EJiiTFBZgepmwkEpGytJX2m4QEsJP,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,7,2026-09-01 06:35:58-07,2026-09-09 02:28:13-07,4,9265.476662
+71d85c2d-c358-5188-834e-2f5906a3a791,gginvestments,solana,G4cLe8Ysgy9sgo2DYAtrPs6Ueqoy63L17Dp5ohRYMuk1,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+23db4ad1-36a0-5601-9fd5-f120d7f9029f,CateCatMfs,solana,G7PnVLZAviYw31LfQ54mmrUeMz6JzsX3b3Z9t7PPSDAo,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,80,2026-08-27 15:24:14-07,2026-09-16 14:27:34-07,16,46863.980543
+ec55562a-1c2a-5955-95fa-025175e05738,LA50197934,solana,G7Vk7JiahsR3Nk6TezmQWdcGAt5bnSJV5HekrPrELwbe,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+117002f2-19bc-523e-b15d-18416f195dcc,dogoyimreally,solana,G7Zz4zLQrhrYh7jiQ375e5jE5Jb9LA7H6DzLZ4irNURz,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,193,2026-08-26 04:13:06-07,2026-09-16 14:39:36-07,83,140506.922782
+3a79f744-b915-5e2d-8c9c-7d1127bcd184,8radly,solana,G8u4mJ4UnkR41ogiHEzmw1pcnHw7xZE6eyU7QNRQtirq,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,8,2026-08-31 22:29:47-07,2026-09-16 07:11:45-07,4,5717.786869
+4c7496bd-7500-517d-8b1f-ea43439dd9e2,Sackrates1,solana,GE1ix6W8VbibpAd6ZTu1wcqTvnHfSz3LTnBikD9AaVMd,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+0c03596e-38bd-52c1-a431-b9f762d57f33,AwfulBasicTuna,solana,GfCd7Mhm2Mo7aXiQcHJ2MUenEx9waDLJJQWKbvapKwiH,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+297d25c5-17b0-574d-bb58-c3c89374f2b6,nobrainflip,solana,GHcamTd45L2uTUa6ie1GmxzSq9wq34Hk12bRoRXiGJCu,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+197fc3a2-475a-5178-9b25-85bdc43481fd,fibs,solana,GJcMxxQf27cYv2KLA26H6VTZdPfrneZ2HmvCdvMxxZfi,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+218ee32c-6567-50f2-be25-bd886aff32a5,dapersiantrader,solana,GKWaRsRmvbTKWPQ2qQQ6k5X9PoG9xHLTczQSP8iMX1PW,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+2e96d01c-b092-563c-8cff-488fe75b30e5,meowmeowmeowmeowmeow,solana,GMqroCnksrnnJcgW8aj9nZP1rbxQSbq5Urcnnyi6TnAQ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,31,2026-08-28 18:10:41-07,2026-09-15 16:36:11-07,8,46114.573681
+1263c4ac-6196-5630-bfc5-2820d1aff13a,hitscanr,solana,GMwEgH9QXsAUathGSoJNmJ3x8AdQwrRU2i6zPWyVGjga,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,19,2026-09-02 14:19:03-07,2026-09-11 12:06:07-07,6,39262.168000
+edb794d6-4361-5928-8371-9b51e9e920e5,tribeonchain,solana,GoShAdtTYx1FJFbAsuoM8d24yu8GtSJjCtF1K82T5pWT,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+bd6dd1e6-9619-5c76-9134-6dcd66bbbf09,gillycoinz,solana,GpVjMe4nudh929ousyNsDWn6AuvUVQ1hB56yQnwuwZF3,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+cbd58cee-1a77-5857-8d11-c7114e3754d3,devwyd,solana,Grf1132n2RLRHe4AkBMPbgACwB6M59UA9fYaCdePBhVs,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+2a4f1054-b9b8-5829-9c80-9bf3961ff342,babycakez,solana,GVH35izD6kA3Q23n9XJ2hKJGJCnRiGbAZyZz1JR4AcqX,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+09d7299f-545f-5ee2-a8d7-51bc31b63c50,CeruleanRange,solana,GvhzWwCWVouppmiUrivUdyisR1mmwsNXAT6z626bkSsG,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,60,2026-09-11 13:51:51-07,2026-09-16 14:44:27-07,2,8537.442756
+146bfa84-5ea4-56de-a56b-d04425a10121,sirchichi,solana,GX1ziUipj7cLsJZY1HuYCwgJUXZSBxLyYPkKN8JmE57i,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,61,2026-09-06 04:06:44-07,2026-09-16 10:52:05-07,7,18019.042432
+87c29197-5d48-5c4e-b398-768f2ee0563b,randomburner,solana,GxTkWJtE6FkvH5zBtefSkGf2xo6dv3Zp43xoZRigxZgN,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+b49a7a36-fa2f-592d-9abc-8410e77aebc1,StonkyScheffler,solana,GXz2R1hvCTaTK3Lfhj7U1eq1VAfczRiUxoS5E5B44Jxm,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+01633d74-3e02-51d3-ad28-af3b3a850df5,Peebs,solana,GyLXQ6Vt6EQWj9LTitJisa89Ae9bjShVbs3ArZzBWKt4,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,79,2026-08-26 09:47:18-07,2026-09-16 14:41:10-07,31,110701.216042
+9601298c-d0c0-5016-9009-ba4402ca66c3,attnmarkets,solana,GZmH3S7zWyzkNidQHJpTECoHru9s3rsworDiESxufFv6,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+02553b8d-0e7f-5ad7-9f82-4ba665ed1734,ch1llguy,solana,H3AWdaMydiUgsBKd7jRxgX1RK5gD1o2z3gqRKpMXRjyc,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,226,2026-08-28 12:17:58-07,2026-09-16 07:10:53-07,105,254527.231239
+d02bfd39-d231-50a9-a8de-e9fd17481d9c,FitGiantSnail,solana,H5X8bqVcuaqtCSoWcdzKLuGm6uqfzGhLdB3Pxz1CeyV7,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+283d4bec-a95f-58ea-9040-75bf9a4df53f,0xKimJihoon,solana,H9URoCQHfWjjh9pS3AZC9h59oLkk4MVNhF7fjNrS2R7x,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+0579798d-4a8b-5fab-b9e9-593172d49326,exulantis,solana,HcCvLQFc8m7gCF6PmxM7pq15oVjHpwKKJjDU9U2cXi4C,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+06154643-255f-566d-999d-ba159b7f86b7,NOFUTU,solana,Hd6hnZVEcR3fFc1DGcjDpFkoSgJ1oSFgxLF4rCZDyhjJ,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,33,2026-09-11 03:46:28-07,2026-09-12 23:22:03-07,1,28767.585099
+0e8efa85-6957-5e99-8b40-c962cbe507d0,xfilesboy,solana,HexA7Nb5S8ritu1vfztWuRwTcMfXPLZSjZt9xa767kPn,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+49f3f434-1c83-5402-9d73-940f3c416d66,PingPongFoghorn,solana,HEye34TsKiksdfSppNp2PYQFqUZb7gCnd3X5etQUK7Dq,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,1831,2026-08-14 14:06:39-07,2026-09-16 14:47:33-07,428,568633.820206
+00948214-04e7-5591-a4a0-287728fffc99,samsrep,solana,hf5SnDZJKZsEvsEP1oPrpkhErspVwpNEZBKU3oaE7mP,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+0b753001-263f-5599-ab17-2644b7b4e888,spudzilla,solana,HF6eoZpTEUTus3tf6MvkfMjt59o1GYDQSd34G37usSE1,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,24,2026-09-12 10:13:43-07,2026-09-16 04:38:39-07,2,23122.071318
+005e3473-211c-5fad-b577-ead7b07d5fea,pyoonpyoon,solana,HGByCJAonNaRp4SwvkPozuXDREX3ZzHk1jNWKUraJRJN,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,93,2026-09-10 19:26:53-07,2026-09-16 12:56:13-07,29,15565.681985
+c022a788-c56f-5270-ab0a-63f079ad820b,jaqs,solana,hh6k5Ue7XZTJsKcvysJXLrKuPtSYiDy2MP45Q5SzLdZ,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+dc56946d-8dba-50e7-b633-d00d4796813d,idiotintraining,solana,HjSEUCKV94JQLDUprD6u6FbqXCdC6TeTJ75AGC6ELCAF,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+1a2e9e29-1c18-5b56-85ad-c824f8c95126,claxxerz,solana,Ho75EMA392uXcqPhqwha765VQtJW6wLuXTuNQpM4aY6k,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+d2591039-bd1c-5406-8830-5df2a8a78ffd,pumpyoass,solana,Hpnf3tmakr2TtDGa1jdxiCVyo87T4Mpj7Ee3udU69mfY,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+32b2c450-e51e-5c6a-aac6-78d3aa6d8186,Blocboybenji,solana,HPZnAaUibuCfR17L6cPJTpv9s9K2BwbdTvjS81SEVU9z,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,19,2026-09-14 04:44:07-07,2026-09-16 00:50:30-07,6,19445.092077
+261e9aac-ee76-5781-86e5-4d3e494ff99c,mk2030,solana,HQ2kFt5adMy5XRX9nJ5Tu4ViWYiQ3U95e9gLf7pNTehm,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+4b65caff-97de-58d8-b5f2-651abb128ed3,TarronBrump,solana,HQxWduEGUTfBqyhPCXvJSURmZZfkzkAZMsfKfNXJntfk,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+27651cd1-7181-5f5a-8463-d586aea234af,MannyOnChain,solana,HTCkiUwJJU1dfLF8iZB7a4oe1sNdq7iqsZ2hCqyqSk6k,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+111c6c8c-e994-5b51-b235-dd48ecddac9c,plottwisst,solana,HTpumppos77vJbxekoSEFsi6HejDLknn6tRngFNptDzR,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+1133feba-f4f9-529a-b12b-33ae32589a0b,ThickCuteMouse,solana,HTQTkzgM27PeJ2sSWvx6TNKTEFju3SDbJjd6zsN8Z8vh,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,13,2026-09-07 06:54:51-07,2026-09-15 09:54:53-07,4,5288.883444
+2fc484e6-aed5-5d93-b6cb-1423ac1adcfc,nisbat,solana,HWoE357rQoLsn5NUeLgSPxvPWRa7Rhk3vdfNc6x5W3Et,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,2,2026-09-08 05:10:58-07,2026-09-13 20:57:03-07,2,59172.646305
+1ffc85ee-ee20-5e6a-b32e-42809dd532a2,metacinderella,solana,HwwkQyoABfRHqQEBPtYVpACy9qdUWAvdddj6XUieZty1,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+4112ca50-678e-5ed5-bf95-1d06ba8419e5,elementalrebirth,solana,Hy9nGD51dgCterYWBetfrEnBxd5uqueYxpxyEZxVYemE,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,1095,2026-08-29 00:20:45-07,2026-09-16 14:40:06-07,435,805756.246811
+3b76aab0-1bb0-5e81-beec-caf334375bc7,AbsoluteLedge,solana,J3A3QrAYi5cyUP8k6KShb1D4UpFXjGQYh9HdLtYUjVm7,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,224,2026-09-06 07:50:42-07,2026-09-16 14:35:23-07,45,47325.310581
+26dc3cd7-b8f8-5334-8644-b0ee6a4d9fa5,jimjones_harlem,solana,J9kRSVB6YM31XwbpW4TREDvrdkPVVfEQVgYZCzYQ3LWY,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,33,2026-08-29 10:47:12-07,2026-09-16 04:23:52-07,11,15605.236528
+3d5ad81a-27cb-5f7f-921a-0422454a5b3a,lunaei11,solana,JCtNAHSSvx6z6oiMRbtXBGFiX7k3Ym1hVr6wBskpDxn7,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,9,2026-09-15 02:07:14-07,2026-09-15 07:53:07-07,4,5983.099780
+976d601b-3323-5ca1-b61d-455e5b2b7174,triplenetcapital,solana,jHtQF29NCZvXAsvxjQhCCHxwSVDTFRqygHPeHgJc1ht,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+37856743-0f5f-558f-b755-42dccdbc2c9b,bigfishycapital,solana,LbXFvWnXbbEqZ6J4452SUVF591uQmxpHcmBjwLp1MGD,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+4abdcd62-6f1a-5b86-9b48-2d15deb9a1f5,ericaarnio,solana,m4ZGojijKfUgbHixF1m9TWzCEZHj6nH82iHtqR5udwW,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,15,2026-09-04 16:23:34-07,2026-09-13 15:59:04-07,6,39509.821551
+4224fb30-d1c3-5338-a74e-17ad54019b6b,Chanzim888,solana,M7Wiztki3rkArPDnj6UFqTeaN5LWWFosThjh8byx6KF,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+4e59db52-67ce-5e92-b299-48467cee9241,slayphindotweb3,solana,MVQdcqMsmrNQDCs8eakd2vEk2WQATxSmYfiCrv4SwUf,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+d0378968-7c91-5133-be1e-5e53364cf9a1,retardedgains,solana,mZvcZabazhsFas2WhkgP3g4hWXWB9ZHKhQLcDw8akwv,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+02485dc1-c859-59ff-ab73-5440959dc534,pringlestein,solana,sb7QMpsWGNCGgXpm8tRiUhKhPibcomw3r5V43XYkTn8,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,57,2026-09-08 08:34:37-07,2026-09-16 09:49:36-07,8,48620.515364
+36f32289-d544-5f17-a500-d302e5d2b140,Bcardi8077,solana,wEyd1kYV8fnGAnsySq7FRWaNwgjUF1JKM4x13Md9DK8,claimed (fomoscan handle response),fomoscan_user_handle.solanaAddress,0,,,0,0
+7b8be17d-5fcc-5524-8e94-945683c05e60,dmoyer15,solana,wHQR5ugZbMyhBq9xaBYGQBnX3XWsBz5gVnUszvXjbno,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+00506d4f-4bb8-5820-bd62-1d56ad8deadf,cryptomocro,solana,WYtYh4q94ekR9NmVzpATCpp4WfMwHbnepo1ZwzcNCtJ,claimed (fomo_app),fomo_wallet_bindings,0,,,0,0
+662bd55e-a8ac-56ca-8f24-1adb2a15a725,salvino,solana,yM57SGYV427tvyYvXTcTwD7Gq7SkRym7xUtUa94AyB8,claimed_unverified,Apollo FomoScan handoff,0,,,0,0
+c9269716-77ad-596e-850b-290273685a4f,Thesis_,solana,zmA1N9GpuwZtt3tYBEpEGTVpskrZvu5kJkzaRSCVxKk,claimed_unverified,Apollo FomoScan handoff,0,,,0,0

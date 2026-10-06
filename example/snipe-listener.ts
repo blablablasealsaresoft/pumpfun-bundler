@@ -2228,6 +2228,12 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
               console.warn("[wallet-flow] research warning", (err as Error).message);
             }
           });
+          enqueueTimingClock({
+            txSignature: frame.signature,
+            slot: frame.slot,
+            source: "helius_preprocessed",
+            observedAt: flowObservedAt,
+          });
         };
         if (!decoded) {
           noteFlowWire();
@@ -2294,6 +2300,29 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
 }
 
 
+function enqueueTimingClock(input: {
+  txSignature?: string | null;
+  mint?: string | null;
+  slot?: number | null;
+  source: string;
+  observedAt: number;
+}) {
+  const captured = {
+    txSignature: input.txSignature || null,
+    mint: input.mint || null,
+    slot: input.slot == null ? null : input.slot,
+    source: input.source,
+    observedAt: input.observedAt,
+  };
+  setImmediate(() => {
+    try {
+      require("./research/timing-frontier-collector.js").noteSourceClock(captured);
+    } catch (err) {
+      console.warn("[timing] research warning", (err as Error).message);
+    }
+  });
+}
+
 function enqueueWalletFlow(input: {
   logs?: string[];
   bytes?: Buffer | null;
@@ -2352,6 +2381,11 @@ async function startLogsListener(ctx: SnipeCtx) {
       const flowObservedAt = Date.now();
       enqueueWalletFlow({
         logs,
+        txSignature: signature,
+        source: "logs",
+        observedAt: flowObservedAt,
+      });
+      enqueueTimingClock({
         txSignature: signature,
         source: "logs",
         observedAt: flowObservedAt,
@@ -2575,6 +2609,12 @@ async function startTxSubscribeListener(ctx: SnipeCtx): Promise<boolean> {
             console.warn("[wallet-flow] research warning", (err as Error).message);
           }
         });
+        enqueueTimingClock({
+          txSignature: sig || null,
+          slot,
+          source: "helius_processed",
+          observedAt: flowObservedAt,
+        });
         if (!meta) return;
         handleCreate(ctx, meta, sig || "txsub", {
           source: "txsub",
@@ -2699,6 +2739,11 @@ async function startGeyserListener(ctx: SnipeCtx): Promise<boolean> {
           source: "geyser",
           observedAt: flowObservedAt,
         });
+        enqueueTimingClock({
+          txSignature: sig,
+          source: "geyser",
+          observedAt: flowObservedAt,
+        });
         if (!metaLogs.length || !isPumpCreateLog(metaLogs)) return;
         const meta = parseCreateEvent(metaLogs);
         if (!meta) return;
@@ -2742,6 +2787,57 @@ async function startGeyserListener(ctx: SnipeCtx): Promise<boolean> {
       "[geyser] Tip: set GEYSER_ENDPOINT + GEYSER_API_TOKEN from Chainstack geyser, or upgrade Helius."
     );
     return false;
+  }
+}
+
+function startTimingStateLane(ctx: SnipeCtx) {
+  let subId: number | null = null;
+  const subscribe = () => {
+    try {
+      if (subId != null) {
+        try {
+          ctx.connection.removeOnLogsListener(subId);
+        } catch {
+          /* already dropped */
+        }
+      }
+      subId = ctx.connection.onLogs(
+        PUMP_PROGRAM,
+        (info, context) => {
+          if (info.err) return;
+          const observedAt = Date.now();
+          const slot = context && typeof context.slot === "number" ? context.slot : null;
+          const logs = info.logs ? info.logs.slice() : [];
+          const txSignature = info.signature || null;
+          setImmediate(() => {
+            try {
+              require("./research/timing-frontier-collector.js").noteLogs({
+                logs,
+                txSignature,
+                slot,
+                source: "processed_logs",
+                observedAt,
+              });
+            } catch (err) {
+              console.warn("[timing] research warning", (err as Error).message);
+            }
+          });
+        },
+        "processed"
+      );
+      console.log("[timing] research logsSubscribe @ processed id=" + subId);
+    } catch (err) {
+      console.warn("[timing] research warning", (err as Error).message);
+      setTimeout(subscribe, 5000);
+    }
+  };
+  subscribe();
+  const ws = (ctx.connection as any)._rpcWebSocket;
+  if (ws && typeof ws.on === "function") {
+    ws.on("close", () => {
+      console.warn("[timing] research warning socket closed; reconnect");
+      setTimeout(subscribe, 2000);
+    });
   }
 }
 
@@ -2901,6 +2997,12 @@ async function main() {
     console.log(
       `[listener] active pre=${preOk} txsub=${txOk} geyser=${geyserOk}`
     );
+  }
+
+  try {
+    startTimingStateLane(ctx);
+  } catch (err) {
+    console.warn("[timing] research warning", (err as Error).message);
   }
 
   setInterval(() => {
