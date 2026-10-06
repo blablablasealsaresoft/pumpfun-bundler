@@ -440,6 +440,98 @@ test("collector appends executed state without becoming a sender", () => {
   collector.resetForTests();
 });
 
+test("frozen Fomo target CSV matches the predeclared Solana universe", () => {
+  const fomo = require("./fomo-target-set");
+  const set = fomo.loadTargetSet();
+  assert.equal(set.loaded, true);
+  assert.equal(set.matchesExpected, true);
+  assert.equal(set.version, "fomoscan_wallets_2026_09_16_v1");
+  assert.equal(set.snapshotAt, "2026-09-16T21:50:00Z");
+  assert.equal(set.counts.f0, 355);
+  assert.equal(set.counts.f1, 144);
+  assert.equal(set.counts.f2, 52);
+  assert.equal(set.counts.f3, 46);
+  assert.equal(set.counts.f4, 20);
+  assert.equal(set.counts.f5, 9);
+  assert.equal(set.observedSwaps, 20619);
+});
+
+test("companion zero-swap Fomo-app wallet is not treated as chain-observed", () => {
+  const fomo = require("./fomo-target-set");
+  const set = fomo.loadTargetSet();
+  // cryptomocro: observed solana vs companion embedded solana with swaps=0
+  const observed = set.byAddress.get("8fuFGqDcr2nj1Athn1at1kCBc34w1SWQHVZJWXTWZgdL");
+  const companion = set.byAddress.get("WYtYh4q94ekR9NmVzpATCpp4WfMwHbnepo1ZwzcNCtJ");
+  assert.ok(observed);
+  assert.ok(companion);
+  assert.equal(observed.fomoClaimedWallet, true);
+  assert.equal(observed.chainObservedFomoWallet, true);
+  assert.equal(companion.fomoClaimedWallet, true);
+  assert.equal(companion.chainObservedFomoWallet, false);
+  assert.equal(companion.priorObservedSwapCount, 0);
+  assert.equal(observed.traderId, companion.traderId);
+});
+
+test("Fomo features stay null before the external snapshot and use trader_id for clusters", () => {
+  const fomo = require("./fomo-target-set");
+  const set = fomo.loadTargetSet();
+  const observedAddr = "8fuFGqDcr2nj1Athn1at1kCBc34w1SWQHVZJWXTWZgdL";
+  const companionAddr = "WYtYh4q94ekR9NmVzpATCpp4WfMwHbnepo1ZwzcNCtJ";
+  const other = [...set.byAddress.values()].find(
+    (w) => w.chainObservedFomoWallet && w.traderId !== set.byAddress.get(observedAddr).traderId
+  );
+  assert.ok(other);
+  const book = tf.emptyBook();
+  const mint = pk();
+  const creator = pk();
+  const first = Date.parse("2026-09-10T00:00:00Z");
+  tf.observeCreate(book, {
+    mint, txSignature: "c", observedAt: first, creator, user: creator,
+    virtualTokenReservesRaw: "1000", virtualSolReservesRaw: "1000",
+    realTokenReservesRaw: "1000", realSolReservesRaw: "0",
+    quoteMint: tf.SOL_MINT, confident: true, feeBasisPoints: 100, creatorFeeBasisPoints: 0,
+  });
+  const early = tf.parseTradeEvent(tradeEvent(baseTrade({ mint, user: observedAddr, creator })));
+  tf.observeTrade(book, { ...early, txSignature: "b1", observedAt: first + 20, source: "processed_logs" });
+  book.launches.get(mint)._book = book;
+  const before = tf.snapshotFeatures(book.launches.get(mint), "100", { targetSet: set });
+  assert.equal(before.externalTargetFeatureEligible, false);
+  assert.equal(before.f1BuyerCount, null);
+
+  const afterFirst = Date.parse("2026-09-17T00:00:00Z");
+  const book2 = tf.emptyBook();
+  tf.observeCreate(book2, {
+    mint, txSignature: "c2", observedAt: afterFirst, creator, user: creator,
+    virtualTokenReservesRaw: "1000", virtualSolReservesRaw: "1000",
+    realTokenReservesRaw: "1000", realSolReservesRaw: "0",
+    quoteMint: tf.SOL_MINT, confident: true, feeBasisPoints: 100, creatorFeeBasisPoints: 0,
+  });
+  const t1 = tf.parseTradeEvent(tradeEvent(baseTrade({ mint, user: observedAddr, creator })));
+  const t2 = tf.parseTradeEvent(tradeEvent(baseTrade({ mint, user: companionAddr, creator })));
+  const t3 = tf.parseTradeEvent(tradeEvent(baseTrade({ mint, user: other.address, creator })));
+  tf.observeTrade(book2, { ...t1, txSignature: "a", observedAt: afterFirst + 10, source: "processed_logs" });
+  tf.observeTrade(book2, { ...t2, txSignature: "b", observedAt: afterFirst + 20, source: "processed_logs" });
+  tf.observeTrade(book2, { ...t3, txSignature: "c3", observedAt: afterFirst + 30, source: "processed_logs" });
+  book2.launches.get(mint)._book = book2;
+  const snap = tf.snapshotFeatures(book2.launches.get(mint), "100", { targetSet: set });
+  assert.equal(snap.externalTargetFeatureEligible, true);
+  assert.equal(snap.f0BuyerCount, 3);
+  assert.equal(snap.f1BuyerCount, 2);
+  assert.equal(snap.f1Cluster2, 1);
+  assert.equal(snap.distinctObservedFomoTraderCount, 2);
+  assert.ok(typeof snap.firstF1BuyerDelayMs === "number");
+});
+
+test("T5 models cannot promote live", () => {
+  const result = tf.evaluateBook(tf.emptyBook());
+  for (const name of ["T5a", "T5b", "T5c", "T5d", "T5e", "T5f"]) {
+    assert.ok(result.models[name]);
+    assert.equal(result.models[name].livePromotion, false);
+  }
+  assert.equal(result.fomoTargetStudyCannotPromoteLive, true);
+  assert.equal(result.shadowCanPromoteLive, false);
+});
+
 function filledBook(opts) {
   const book = tf.emptyBook();
   const mint = pk();

@@ -18,6 +18,9 @@ function formatReport(result) {
   lines.push("timing-frontier");
   lines.push("featureVersion " + result.featureVersion);
   lines.push("researchBuySol " + result.researchBuySol);
+  lines.push("externalTargetSetVersion " + result.externalTargetSetVersion);
+  lines.push("externalTargetSnapshotAt " + result.externalTargetSnapshotAt);
+  lines.push("externalTargetMatchesExpected " + result.externalTargetMatchesExpected);
   lines.push("verdict " + result.verdict);
   lines.push("liveStatus " + result.liveStatus);
   lines.push("liveTrading " + result.liveTrading);
@@ -62,6 +65,27 @@ function formatReport(result) {
       " mfe " + fmt(row.mfe) +
       " catastrophic " + fmt(row.catastrophic)
     );
+    if (row.fomo) {
+      lines.push(
+        "fomo " + horizon +
+        " eligible " + row.fomo.eligibleLaunches +
+        " anyF1 " + row.fomo.anyF1 +
+        " anyF2 " + row.fomo.anyF2 +
+        " anyF3 " + row.fomo.anyF3 +
+        " f1Cluster2 " + row.fomo.f1Cluster2 +
+        " f2Cluster2 " + row.fomo.f2Cluster2 +
+        " f3Cluster2 " + row.fomo.f3Cluster2 +
+        " medianFirstTargetArrival " + fmt(row.fomo.medianFirstTargetArrivalMs) +
+        " medianSecondTargetArrival " + fmt(row.fomo.medianSecondTargetArrivalMs) +
+        " baselineMedianPnl " + fmt(row.fomo.baseline.medianPnl) +
+        " targetBuyerMedianPnl " + fmt(row.fomo.targetBuyer.medianPnl) +
+        " clusterMedianPnl " + fmt(row.fomo.cluster.medianPnl) +
+        " entryPremiumBeforeTarget " + fmt(row.fomo.entryPremiumBeforeTarget) +
+        " targetMFE " + fmt(row.fomo.targetBuyer.mfe) +
+        " targetMAE " + fmt(row.fomo.targetBuyer.mae) +
+        " targetRunner10 " + fmt(row.fomo.targetBuyer.runner10)
+      );
+    }
   }
   lines.push("mayhem is reported separately and is not an opportunity feature.");
   for (const horizon of ["current", "1000", "2000"]) {
@@ -92,6 +116,7 @@ function formatReport(result) {
     " firstShare " + JSON.stringify(listener.sourceFirstShare)
   );
   lines.push("live_selected remains COLLECT. This report cannot promote live.");
+  lines.push("Fomo target study is research-only and cannot promote live.");
   return lines.join("\n");
 }
 

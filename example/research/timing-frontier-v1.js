@@ -17,10 +17,13 @@
 
 const { PublicKey } = require("@solana/web3.js");
 const { mean, pctile, trimmedMean, spearman, bootstrapMedianDiff, mulberry32 } = require("./math");
+const fomoTargets = require("./fomo-target-set");
 
 const FEATURE_VERSION = "timing_frontier_v1";
 const EVENT_TYPE = "pump_trade_state_v1";
 const RESEARCH_EPOCH = "selection_timing_frontier_2026_10";
+const EXTERNAL_TARGET_SET_VERSION = fomoTargets.EXTERNAL_TARGET_SET_VERSION;
+const EXTERNAL_TARGET_SNAPSHOT_AT = fomoTargets.EXTERNAL_TARGET_SNAPSHOT_AT;
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const DEFAULT_PUBKEY = "11111111111111111111111111111111";
@@ -69,7 +72,21 @@ const MODELS = {
     "experiencedWalletCount",
     "sourceCount",
   ],
+  // T5 uses distinct trader_id clusters, not address-only coincidence.
+  T5a: ["f1BuyerCount"],
+  T5b: ["f2BuyerCount"],
+  T5c: ["f3BuyerCount"],
+  T5d: ["f1Cluster2"],
+  T5e: ["f2Cluster2"],
+  T5f: ["f3Cluster2"],
 };
+
+let cachedTargetSet = null;
+function getTargetSet(opt) {
+  if (opt && opt.targetSet) return opt.targetSet;
+  if (!cachedTargetSet) cachedTargetSet = fomoTargets.loadTargetSet();
+  return cachedTargetSet;
+}
 
 const FORBIDDEN_LIVE_TEXT = ["ENABLE LIVE", "PROMOTE LIVE", "TURN OFF KILL"];
 
@@ -353,7 +370,7 @@ function lamportsToSol(raw) {
   }
 }
 
-function snapshotFeatures(launch, horizon) {
+function snapshotFeatures(launch, horizon, opt) {
   const end = horizonEnd(launch, horizon);
   const first = firstObservedAt(launch);
   if (end == null || first == null) return null;
@@ -371,6 +388,13 @@ function snapshotFeatures(launch, horizon) {
   let nonCreatorBuy = 0n;
   const delays = [];
   const sources = new Set();
+  const targetSet = getTargetSet(opt);
+  const fomoEligible = fomoTargets.externalTargetFeatureEligible(first, targetSet);
+  const fomoBuyers = { 0: new Set(), 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set(), 5: new Set() };
+  const fomoTraders = { 0: new Set(), 1: new Set(), 2: new Set(), 3: new Set(), 4: new Set(), 5: new Set() };
+  const fomoDelays = { 1: [], 2: [], 3: [] };
+  let fomoGross = 0n;
+  let fomoSell = 0n;
   for (const trade of launch.trades) {
     if (!Number.isFinite(trade.observedAt) || trade.observedAt > end) continue;
     if (trade.source) sources.add(trade.source);
@@ -387,10 +411,28 @@ function snapshotFeatures(launch, horizon) {
         delays.push(trade.observedAt - first);
         const prev = buys.get(trade.user) || 0n;
         buys.set(trade.user, prev + amt);
+        if (fomoEligible) {
+          const hit = fomoTargets.lookupAddress(targetSet, trade.user);
+          if (hit && hit.fomoClaimedWallet) {
+            const delay = trade.observedAt - first;
+            for (let t = 0; t <= hit.maxTier; t++) {
+              fomoBuyers[t].add(trade.user);
+              if (hit.traderId) fomoTraders[t].add(hit.traderId);
+            }
+            if (hit.activityTier.F1) fomoDelays[1].push(delay);
+            if (hit.activityTier.F2) fomoDelays[2].push(delay);
+            if (hit.activityTier.F3) fomoDelays[3].push(delay);
+            if (solQuote) fomoGross += amt;
+          }
+        }
       }
     } else {
       sellCount += 1;
       if (solQuote && trade.solAmountRaw) grossSell += BigInt(trade.solAmountRaw);
+      if (fomoEligible && solQuote && trade.solAmountRaw) {
+        const hit = fomoTargets.lookupAddress(targetSet, trade.user);
+        if (hit && hit.fomoClaimedWallet) fomoSell += BigInt(trade.solAmountRaw);
+      }
     }
   }
   for (const src of launch.sources) {
@@ -405,7 +447,14 @@ function snapshotFeatures(launch, horizon) {
   const grossSellSol = solQuote ? lamportsToSol(grossSell) : null;
   const netBuySol = grossBuySol != null && grossSellSol != null ? grossBuySol - grossSellSol : null;
   const creatorShare = solQuote && grossBuy > 0n ? Number((creatorBuy * 10000n) / grossBuy) / 10000 : null;
-  return {
+  const sorted = (arr) => [...arr].sort((a, b) => a - b);
+  const fomoGrossBuySol = fomoEligible && solQuote ? lamportsToSol(fomoGross) : null;
+  const fomoSellSol = fomoEligible && solQuote ? lamportsToSol(fomoSell) : null;
+  const fomoNetBuySol =
+    fomoGrossBuySol != null && fomoSellSol != null ? fomoGrossBuySol - fomoSellSol : null;
+  const fomoShareOfObservedBuyFlow =
+    fomoEligible && solQuote && grossBuy > 0n ? Number((fomoGross * 10000n) / grossBuy) / 10000 : null;
+  const base = {
     horizon,
     horizonEnd: end,
     uniqueNonCreatorBuyers: buys.size,
@@ -423,11 +472,74 @@ function snapshotFeatures(launch, horizon) {
     buyVelocity: independentBuyCount / windowSec,
     experiencedWalletCount: experienced,
     firstIndependentBuyDelayMs: delays.length ? Math.min(...delays) : null,
-    secondIndependentBuyDelayMs: delays.length > 1 ? [...delays].sort((a, b) => a - b)[1] : null,
+    secondIndependentBuyDelayMs: delays.length > 1 ? sorted(delays)[1] : null,
     creatorParticipation: creatorBuy > 0n ? 1 : 0,
     creatorShareOfBuyFlow: creatorShare,
     sourceCount: sources.size,
     solQuote,
+    externalTargetFeatureEligible: fomoEligible,
+    externalTargetSetVersion: EXTERNAL_TARGET_SET_VERSION,
+  };
+  if (!fomoEligible) {
+    return {
+      ...base,
+      f0BuyerCount: null,
+      f1BuyerCount: null,
+      f2BuyerCount: null,
+      f3BuyerCount: null,
+      f4BuyerCount: null,
+      f5BuyerCount: null,
+      distinctFomoTraderCount: null,
+      distinctObservedFomoTraderCount: null,
+      firstF1BuyerDelayMs: null,
+      firstF2BuyerDelayMs: null,
+      firstF3BuyerDelayMs: null,
+      secondF1BuyerDelayMs: null,
+      secondF2BuyerDelayMs: null,
+      f1Cluster2: null,
+      f1Cluster3: null,
+      f2Cluster2: null,
+      f2Cluster3: null,
+      f3Cluster2: null,
+      f3Cluster3: null,
+      fomoGrossBuySol: null,
+      fomoNetBuySol: null,
+      fomoShareOfObservedBuyFlow: null,
+      firstTargetWalletDelayMs: null,
+      secondTargetWalletDelayMs: null,
+      targetWalletArrivalVelocity: null,
+    };
+  }
+  const d1 = sorted(fomoDelays[1]);
+  const d2 = sorted(fomoDelays[2]);
+  const d3 = sorted(fomoDelays[3]);
+  return {
+    ...base,
+    f0BuyerCount: fomoBuyers[0].size,
+    f1BuyerCount: fomoBuyers[1].size,
+    f2BuyerCount: fomoBuyers[2].size,
+    f3BuyerCount: fomoBuyers[3].size,
+    f4BuyerCount: fomoBuyers[4].size,
+    f5BuyerCount: fomoBuyers[5].size,
+    distinctFomoTraderCount: fomoTraders[0].size,
+    distinctObservedFomoTraderCount: fomoTraders[1].size,
+    firstF1BuyerDelayMs: d1.length ? d1[0] : null,
+    firstF2BuyerDelayMs: d2.length ? d2[0] : null,
+    firstF3BuyerDelayMs: d3.length ? d3[0] : null,
+    secondF1BuyerDelayMs: d1.length > 1 ? d1[1] : null,
+    secondF2BuyerDelayMs: d2.length > 1 ? d2[1] : null,
+    f1Cluster2: fomoTraders[1].size >= 2 ? 1 : 0,
+    f1Cluster3: fomoTraders[1].size >= 3 ? 1 : 0,
+    f2Cluster2: fomoTraders[2].size >= 2 ? 1 : 0,
+    f2Cluster3: fomoTraders[2].size >= 3 ? 1 : 0,
+    f3Cluster2: fomoTraders[3].size >= 2 ? 1 : 0,
+    f3Cluster3: fomoTraders[3].size >= 3 ? 1 : 0,
+    fomoGrossBuySol,
+    fomoNetBuySol,
+    fomoShareOfObservedBuyFlow,
+    firstTargetWalletDelayMs: d1.length ? d1[0] : null,
+    secondTargetWalletDelayMs: d1.length > 1 ? d1[1] : null,
+    targetWalletArrivalVelocity: fomoTraders[1].size / windowSec,
   };
 }
 
@@ -840,7 +952,7 @@ function buildHorizonRows(book, horizon, opts = {}) {
     if (!pathComplete(launch, COMPLETE_2S_MS)) continue;
     if (opts.nonMayhem && launch.mayhem === true) continue;
     if (opts.mayhemOnly && launch.mayhem !== true) continue;
-    const features = snapshotFeatures(launch, horizon);
+    const features = snapshotFeatures(launch, horizon, opts);
     if (!features) continue;
     const outcome = outcomeAt(launch, horizon);
     const current = horizon === "current" ? outcome : outcomeAt(launch, "current");
@@ -1033,8 +1145,17 @@ function summarizeHorizon(rows) {
   for (const name of O1_FEATURES) cov[name] = coverage(rows, name);
   const fit = O1_FEATURES.filter((name) => cov[name].eligible);
   const walk = walkForward(economic, O1_FEATURES);
-  const strict = strictResearchPass(walk, economic);
+  const strict = strictResearchPass(walk);
   const stats = cohortStats(economic);
+  const fomoEligibleRows = rows.filter((r) => r.features && r.features.externalTargetFeatureEligible);
+  const withF1 = fomoEligibleRows.filter((r) => (r.features.f1BuyerCount || 0) > 0);
+  const withF2 = fomoEligibleRows.filter((r) => (r.features.f2BuyerCount || 0) > 0);
+  const withF3 = fomoEligibleRows.filter((r) => (r.features.f3BuyerCount || 0) > 0);
+  const withF1c2 = fomoEligibleRows.filter((r) => r.features.f1Cluster2 === 1);
+  const withF2c2 = fomoEligibleRows.filter((r) => r.features.f2Cluster2 === 1);
+  const withF3c2 = fomoEligibleRows.filter((r) => r.features.f3Cluster2 === 1);
+  const firstArrivals = withF1.map((r) => r.features.firstTargetWalletDelayMs).filter((v) => typeof v === "number");
+  const secondArrivals = withF1.map((r) => r.features.secondTargetWalletDelayMs).filter((v) => typeof v === "number");
   return {
     eligibleN: economic.length,
     featureRows: rows.length,
@@ -1056,10 +1177,29 @@ function summarizeHorizon(rows) {
     top5MedianPnl: walk.folds.length ? walk.folds.map((f) => f.topMedianPnl) : [],
     walk,
     strict,
+    fomo: {
+      eligibleLaunches: fomoEligibleRows.length,
+      anyF1: withF1.length,
+      anyF2: withF2.length,
+      anyF3: withF3.length,
+      f1Cluster2: withF1c2.length,
+      f2Cluster2: withF2c2.length,
+      f3Cluster2: withF3c2.length,
+      medianFirstTargetArrivalMs: pctile(firstArrivals, 50),
+      medianSecondTargetArrivalMs: pctile(secondArrivals, 50),
+      baseline: stats,
+      targetBuyer: cohortStats(withF1.filter((r) => typeof r.pnl === "number")),
+      cluster: cohortStats(withF1c2.filter((r) => typeof r.pnl === "number")),
+      entryPremiumBeforeTarget: pctile(
+        withF1.map((r) => r.entryPremiumPct).filter((v) => typeof v === "number"),
+        50
+      ),
+    },
   };
 }
 
-function healthFromBook(book) {
+function healthFromBook(book, opt) {
+  const targetSet = getTargetSet(opt);
   const launches = [...book.launches.values()];
   const withCreate = launches.filter((l) => l.create && l.create.confident);
   const withTrade = launches.filter((l) => l.trades.some((t) => reservesOf(t)));
@@ -1072,11 +1212,15 @@ function healthFromBook(book) {
   }
   const byHorizon = {};
   for (const horizon of HORIZONS) {
-    const rows = buildHorizonRows(book, horizon, { nonMayhem: true });
+    const rows = buildHorizonRows(book, horizon, { nonMayhem: true, targetSet });
     byHorizon[horizon] = {
       pathEligible: rows.length,
       economic: rows.filter((r) => r.outcome && !r.outcome.abstain).length,
       independentFlow: rows.filter((r) => r.features.uniqueNonCreatorBuyers > 0).length,
+      fomoEligible: rows.filter((r) => r.features.externalTargetFeatureEligible).length,
+      anyF1: rows.filter((r) => (r.features.f1BuyerCount || 0) > 0).length,
+      anyF2: rows.filter((r) => (r.features.f2BuyerCount || 0) > 0).length,
+      anyF3: rows.filter((r) => (r.features.f3BuyerCount || 0) > 0).length,
     };
   }
   return {
@@ -1093,6 +1237,10 @@ function healthFromBook(book) {
     sources,
     pathCoverageByHorizon: byHorizon,
     geyserConfigured: Boolean(process.env.GEYSER_ENDPOINT),
+    externalTargetSetVersion: EXTERNAL_TARGET_SET_VERSION,
+    externalTargetSnapshotAt: EXTERNAL_TARGET_SNAPSHOT_AT,
+    externalTargetCounts: targetSet.counts,
+    externalTargetMatchesExpected: targetSet.matchesExpected === true,
   };
 }
 
@@ -1147,27 +1295,28 @@ function verdictFrom(health, horizons) {
   return "NO_WALLET_FLOW_EDGE";
 }
 
-function evaluateBook(book) {
-  const health = healthFromBook(book);
+function evaluateBook(book, opt) {
+  const targetSet = getTargetSet(opt);
+  const health = healthFromBook(book, { targetSet });
   const horizons = {};
   const riskLow = {};
   for (const horizon of HORIZONS) {
-    const rows = buildHorizonRows(book, horizon, { nonMayhem: true });
+    const rows = buildHorizonRows(book, horizon, { nonMayhem: true, targetSet });
     horizons[horizon] = summarizeHorizon(rows);
     riskLow[horizon] = summarizeHorizon(rows);
   }
   const mayhem = {};
   for (const horizon of HORIZONS) {
-    mayhem[horizon] = summarizeHorizon(buildHorizonRows(book, horizon, { mayhemOnly: true }));
+    mayhem[horizon] = summarizeHorizon(buildHorizonRows(book, horizon, { mayhemOnly: true, targetSet }));
   }
   const models = {};
-  const modelRows = buildHorizonRows(book, "1000", { nonMayhem: true }).filter((r) => typeof r.pnl === "number");
+  const modelRows = buildHorizonRows(book, "1000", { nonMayhem: true, targetSet }).filter((r) => typeof r.pnl === "number");
   for (const [name, features] of Object.entries(MODELS)) {
     const walk = walkForward(modelRows, features);
     models[name] = {
       features,
       walk,
-      strict: strictResearchPass(walk, modelRows),
+      strict: strictResearchPass(walk),
       livePromotion: false,
     };
   }
@@ -1176,6 +1325,10 @@ function evaluateBook(book) {
     featureVersion: FEATURE_VERSION,
     epoch: RESEARCH_EPOCH,
     researchBuySol: RESEARCH_BUY_SOL,
+    externalTargetSetVersion: EXTERNAL_TARGET_SET_VERSION,
+    externalTargetSnapshotAt: EXTERNAL_TARGET_SNAPSHOT_AT,
+    externalTargetCounts: targetSet.counts,
+    externalTargetMatchesExpected: targetSet.matchesExpected === true,
     horizons,
     riskLowSubgroup: riskLow,
     mayhemSeparate: mayhem,
@@ -1188,6 +1341,7 @@ function evaluateBook(book) {
     pass: false,
     liveTrading: "OFF",
     kill: "ON",
+    fomoTargetStudyCannotPromoteLive: true,
   };
 }
 
@@ -1201,6 +1355,8 @@ module.exports = {
   FEATURE_VERSION,
   EVENT_TYPE,
   RESEARCH_EPOCH,
+  EXTERNAL_TARGET_SET_VERSION,
+  EXTERNAL_TARGET_SNAPSHOT_AT,
   SOL_MINT,
   USDC_MINT,
   RESEARCH_BUY_SOL,
@@ -1239,4 +1395,5 @@ module.exports = {
   assertNoLivePromotion,
   firstObservedAt,
   pathComplete,
+  getTargetSet,
 };

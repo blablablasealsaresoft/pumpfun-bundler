@@ -10,6 +10,10 @@ function formatHealth(health) {
   const lines = [];
   lines.push("timing-frontier-health");
   lines.push("featureVersion " + health.featureVersion);
+  lines.push("externalTargetSetVersion " + health.externalTargetSetVersion);
+  lines.push("externalTargetSnapshotAt " + health.externalTargetSnapshotAt);
+  lines.push("externalTargetMatchesExpected " + health.externalTargetMatchesExpected);
+  lines.push("externalTargetCounts " + JSON.stringify(health.externalTargetCounts));
   lines.push("launches " + health.launches);
   lines.push("create-state coverage " + health.launchesWithCreateState + "/" + health.launches);
   lines.push("executed TradeEvent coverage " + health.launchesWithTradeState + "/" + health.launches);
@@ -29,7 +33,11 @@ function formatHealth(health) {
       "horizon " + horizon +
       " pathEligible " + row.pathEligible +
       " economic " + row.economic +
-      " independentFlow " + row.independentFlow
+      " independentFlow " + row.independentFlow +
+      " fomoEligible " + row.fomoEligible +
+      " anyF1 " + row.anyF1 +
+      " anyF2 " + row.anyF2 +
+      " anyF3 " + row.anyF3
     );
   }
   lines.push("liveStatus UNCHANGED");
