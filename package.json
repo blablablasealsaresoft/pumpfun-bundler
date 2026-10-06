@@ -8,8 +8,9 @@
   "types": "dist/cjs/index.d.ts",
   "scripts": {
     "test": "npm run test:research",
-    "test:research": "node example/research/promotion-harness.test.js",
+    "test:research": "node example/research/promotion-harness.test.js && node example/research/selection-v2.test.js",
     "research:promotion": "node example/research/report.js",
+    "research:model-v2": "node example/research/selection-v2-report.js",
     "build": "rimraf dist/ && npm run build:node && npm run build:browser",
     "build:node": "tsc && tsc -p tsconfig.cjs.json",
     "build:browser": "rollup -c rollup.config.js --bundleConfigAsCjs",

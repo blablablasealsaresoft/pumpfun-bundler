@@ -29,3 +29,11 @@ npm run test:research
 | C | `effective_n >= 100` | `PASS` or `FAIL` |
 
 Operational COLLECT status tracks **live_selected**. Shadow ranking is reported alongside for research while the safety kill holds.
+
+## Selection v2 (shadow only)
+
+`deployer85-shrink-v1` stays the frozen baseline. `selection-v2-shadow` is a separate epoch (`selection_v2_shadow_2026_10`) and cannot set a live PASS.
+
+```bash
+npm run research:model-v2
+```
