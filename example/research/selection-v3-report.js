@@ -143,6 +143,23 @@ function formatV3Report(rep, baseline) {
           " rho pnl " +
           fmt(f.rhoPnlHighConfidence)
       );
+      lines.push("  " + f.name + " fit features: " + ((f.fitFeatures && f.fitFeatures.length) ? f.fitFeatures.join(", ") : "none"));
+      for (const v of f.variation || []) {
+        lines.push(
+          "    " +
+            v.feature +
+            " coverage_n=" +
+            v.coverage_n +
+            " unique_values=" +
+            v.unique_values +
+            " stddev=" +
+            fmt(v.stddev) +
+            " usable_for_fit=" +
+            v.usable_for_fit +
+            " reason=" +
+            (v.reason || "varies")
+        );
+      }
     }
     lines.push("  walk-forward is descriptive. It is not PASS_OPPORTUNITY_RESEARCH.");
     if (!rep.opportunity.opportunityScored) {

@@ -38,13 +38,72 @@ const RISK_FEATURES = [
 ];
 
 const OPPORTUNITY_FEATURES = [
-  "uniqueBuyers",
-  "buyVelocity",
-  "topBuyerShare",
-  "experiencedWalletCount",
-  "sourceCount",
-  "curveProgress",
+  { family: "walletFlow", name: "uniqueBuyers" },
+  { family: "walletFlow", name: "buyVelocity" },
+  { family: "walletFlow", name: "topBuyerShare" },
+  { family: "walletFlow", name: "experiencedWalletCount" },
+  { family: "listener", name: "sourceCount" },
+  { family: "curve", name: "curveProgress" },
 ];
+
+function finiteOrNull(v) {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+function opportunityFeatureValue(row, spec) {
+  if (!row || row.excludedForLeakage || !spec) return null;
+  const cutoff = finiteOrNull(row.decisionCutoffAt);
+  if (spec.family === "walletFlow") {
+    const flow = row.walletFlowDecision;
+    if (!flow || flow.decisionEligible === false || flow.afterDecision === true) return null;
+    const seen = finiteOrNull(flow.lastIncludedObservedAt);
+    if (seen != null && cutoff != null && seen > cutoff) return null;
+    return finiteOrNull(flow[spec.name]);
+  }
+  if (spec.family === "listener" && spec.name === "sourceCount") {
+    return finiteOrNull(row.sourceCountAtDecision);
+  }
+  if (spec.family === "curve" && spec.name === "curveProgress") {
+    const curve = row.curveDecision;
+    if (!curve || curve.decisionEligible === false || curve.afterDecision === true) return null;
+    const seen = finiteOrNull(curve.observedAt);
+    if (seen != null && cutoff != null && seen > cutoff) return null;
+    return finiteOrNull(curve.curveProgress);
+  }
+  return null;
+}
+
+function featureVariation(rows, features = OPPORTUNITY_FEATURES) {
+  return features.map((spec) => {
+    const values = [];
+    for (const row of rows || []) {
+      const v = opportunityFeatureValue(row, spec);
+      if (v != null) values.push(v);
+    }
+    const unique = new Set(values);
+    const mu = values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+    let variance = 0;
+    if (mu != null) {
+      for (const v of values) variance += (v - mu) * (v - mu);
+      variance = values.length ? variance / values.length : 0;
+    }
+    const stddev = mu == null ? null : Math.sqrt(variance);
+    let reason = null;
+    if (values.length < 2) reason = "coverage_below_2";
+    else if (unique.size < 2) reason = "unique_values<2";
+    else if (stddev == null || stddev < 1e-12) reason = "stddev~0";
+    return {
+      feature: spec.family + "." + spec.name,
+      family: spec.family,
+      name: spec.name,
+      coverage_n: values.length,
+      unique_values: unique.size,
+      stddev,
+      usable_for_fit: reason == null,
+      reason,
+    };
+  });
+}
 
 function badTail(row) {
   const pnl = row.pnl;
@@ -329,6 +388,8 @@ function evaluateOpportunity(rows) {
         rhoPnl: spearman(usable.map((r) => r.opportunityScore), usable.map((r) => r.pnl)).rho,
         rhoMfe: spearman(usable.map((r) => r.opportunityScore), usable.map((r) => r.mfe)).rho,
         rhoPnlHighConfidence: spearman(high.map((r) => r.opportunityScore), high.map((r) => r.pnl)).rho,
+        variation: model.variation,
+        fitFeatures: model.fitFeatures,
       });
     }
   }
@@ -359,31 +420,37 @@ function opportunityStatus(rows) {
 
 function fitOpportunity(train) {
   const usable = train.filter((r) => r.researchEpoch === V3_EPOCH && hasDecisionWalletFlow(r) && typeof r.pnl === "number");
-  if (usable.length < 30) {
+  const features = OPPORTUNITY_FEATURES.map((spec) => ({
+    ...spec,
+    get: (row) => opportunityFeatureValue(row, spec),
+  }));
+  const variation = featureVariation(usable, features);
+  const fitFeatures = features.filter((spec) => {
+    const diag = variation.find((row) => row.family === spec.family && row.name === spec.name);
+    return diag && diag.usable_for_fit;
+  });
+  function abstain(reason) {
     return {
       ready: false,
+      variation,
+      fitFeatures: fitFeatures.map((spec) => spec.family + "." + spec.name),
       score() {
         return {
           opportunityScore: null,
           opportunityConfidence: 0,
-          abstainReason: "insufficient_v3_train",
+          abstainReason: reason,
           components: {},
         };
       },
     };
   }
-  const features = OPPORTUNITY_FEATURES.map((name) => ({
-    family: "walletFlow",
-    name,
-    get: (r) => {
-      const flow = r.walletFlowDecision || {};
-      const v = flow[name];
-      return typeof v === "number" ? v : null;
-    },
-  }));
-  const fit = fitLinear(usable, features, (r) => r.pnl);
+  if (usable.length < 30) return abstain("insufficient_v3_train");
+  if (!fitFeatures.length) return abstain("no_feature_variation");
+  const fit = fitLinear(usable, fitFeatures, (r) => r.pnl);
   return {
     ready: true,
+    variation,
+    fitFeatures: fitFeatures.map((spec) => spec.family + "." + spec.name),
     score(row) {
       if (row.researchEpoch !== V3_EPOCH || !hasDecisionWalletFlow(row)) {
         return {
@@ -401,10 +468,10 @@ function fitOpportunity(train) {
           components: {},
         };
       }
-      const scored = scoreLinear(row, features, fit);
+      const scored = scoreLinear(row, fitFeatures, fit);
       return {
         opportunityScore: scored.value,
-        opportunityConfidence: scored.used ? Math.min(1, scored.used / features.length) : 0,
+        opportunityConfidence: scored.used ? Math.min(1, scored.used / fitFeatures.length) : 0,
         abstainReason: scored.value == null ? "no_opportunity_features" : null,
         components: scored.components,
       };
@@ -547,6 +614,8 @@ module.exports = {
   SUBGROUP_MIN_N,
   RISK_FEATURES,
   OPPORTUNITY_FEATURES,
+  opportunityFeatureValue,
+  featureVariation,
   FORBIDDEN_LIVE_TEXT,
   badTail,
   fitRisk,

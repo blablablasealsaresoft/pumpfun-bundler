@@ -847,6 +847,77 @@ test("opportunity evaluator uses collector rows and leaves historical risk uncha
   assert.ok(held.opportunity.folds[0].test ? true : held.opportunity.folds[0].n >= 0);
 });
 
+test("opportunity features read by family and constant flow cannot fit", () => {
+  const row = {
+    researchEpoch: "selection_v3_shadow_2026_10",
+    decisionCutoffAt: 1_000,
+    excludedForLeakage: false,
+    sourceCountAtDecision: 2,
+    walletFlowDecision: {
+      uniqueBuyers: 1,
+      buyVelocity: 4,
+      topBuyerShare: 1,
+      experiencedWalletCount: 0,
+      sourceCount: 99,
+      decisionEligible: true,
+      lastIncludedObservedAt: 1_000,
+    },
+    curveDecision: { curveProgress: 0.25, decisionEligible: true, observedAt: 900 },
+  };
+  assert.strictEqual(v3.opportunityFeatureValue(row, { family: "walletFlow", name: "uniqueBuyers" }), 1);
+  assert.strictEqual(v3.opportunityFeatureValue(row, { family: "walletFlow", name: "buyVelocity" }), 4);
+  assert.strictEqual(v3.opportunityFeatureValue(row, { family: "listener", name: "sourceCount" }), 2);
+  assert.notStrictEqual(v3.opportunityFeatureValue(row, { family: "listener", name: "sourceCount" }), 99);
+  assert.strictEqual(v3.opportunityFeatureValue(row, { family: "curve", name: "curveProgress" }), 0.25);
+  assert.strictEqual(v3.opportunityFeatureValue(row, { family: "walletFlow", name: "missingFeature" }), null);
+  const lateFlow = {
+    ...row,
+    walletFlowDecision: { ...row.walletFlowDecision, lastIncludedObservedAt: 2_000 },
+  };
+  assert.strictEqual(v3.opportunityFeatureValue(lateFlow, { family: "walletFlow", name: "uniqueBuyers" }), null);
+  const lateCurve = {
+    ...row,
+    curveDecision: { curveProgress: 0.9, decisionEligible: true, observedAt: 2_000 },
+  };
+  assert.strictEqual(v3.opportunityFeatureValue(lateCurve, { family: "curve", name: "curveProgress" }), null);
+  const afterFlag = {
+    ...row,
+    curveDecision: { curveProgress: 0.4, decisionEligible: false, afterDecision: true, observedAt: 500 },
+  };
+  assert.strictEqual(v3.opportunityFeatureValue(afterFlag, { family: "curve", name: "curveProgress" }), null);
+
+  const train = [];
+  for (let i = 0; i < 40; i++) {
+    train.push({
+      researchEpoch: "selection_v3_shadow_2026_10",
+      decisionCutoffAt: 5_000 + i,
+      pnl: i % 2 === 0 ? -2 : 3,
+      walletFlowDecision: {
+        uniqueBuyers: 1,
+        topBuyerShare: 1,
+        decisionEligible: true,
+        lastIncludedObservedAt: 5_000 + i,
+      },
+      sourceCountAtDecision: 1,
+      curveDecision: null,
+    });
+  }
+  const diag = v3.featureVariation(train);
+  const buyers = diag.find((d) => d.feature === "walletFlow.uniqueBuyers");
+  const share = diag.find((d) => d.feature === "walletFlow.topBuyerShare");
+  const velocity = diag.find((d) => d.feature === "walletFlow.buyVelocity");
+  assert.strictEqual(buyers.usable_for_fit, false);
+  assert.strictEqual(buyers.unique_values, 1);
+  assert.strictEqual(buyers.reason, "unique_values<2");
+  assert.strictEqual(share.usable_for_fit, false);
+  assert.strictEqual(velocity.coverage_n, 0);
+  assert.strictEqual(velocity.usable_for_fit, false);
+  const model = v3.fitOpportunity(train);
+  assert.strictEqual(model.ready, false);
+  assert.strictEqual(model.score(train[0]).opportunityScore, null);
+  assert.strictEqual(model.score(train[0]).abstainReason, "no_feature_variation");
+});
+
 console.log("");
 console.log("results: " + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);
