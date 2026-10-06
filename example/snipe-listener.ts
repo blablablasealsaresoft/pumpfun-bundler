@@ -1573,6 +1573,22 @@ async function handleCreate(
     console.warn("[V3] source note failed", (err as Error).message);
   }
 
+  try {
+    // Research registration only. In-memory; no RPC and no effect on the decision.
+    require("./research/wallet-flow-collector.js").noteCandidate({
+      mint: mintStr,
+      createSignature: signature,
+      creator: meta.creator,
+      deployer: meta.user,
+      quoteMint: meta.quoteMint,
+      mayhem: meta.isMayhem,
+      observedAt: Date.now(),
+      source,
+    });
+  } catch (err) {
+    console.warn("[wallet-flow] research warning", (err as Error).message);
+  }
+
   if (seen.has(mintStr) || skipMints.has(mintStr)) {
     if (skipMints.has(mintStr)) console.log(`[skip] our mint ${mintStr}`);
     return;
@@ -2193,10 +2209,30 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
 
       try {
         const receivedNs = nowNs();
+        const flowObservedAt = Date.now();
         const frame = parsePreprocessedFrame(Buffer.from(data as Buffer));
         if (!frame) return;
         const decoded = decodeCreateFromWireTx(frame.txBytes, PUMP_PROGRAM);
-        if (!decoded) return;
+        const flowBytes = Buffer.from(frame.txBytes);
+        const noteFlowWire = () => {
+          setImmediate(() => {
+            try {
+              require("./research/wallet-flow-collector.js").noteWireTransaction({
+                bytes: flowBytes,
+                txSignature: frame.signature,
+                slot: frame.slot,
+                source: "helius_preprocessed",
+                observedAt: flowObservedAt,
+              });
+            } catch (err) {
+              console.warn("[wallet-flow] research warning", (err as Error).message);
+            }
+          });
+        };
+        if (!decoded) {
+          noteFlowWire();
+          return;
+        }
         const decodedNs = nowNs();
 
         // Light filters only — no CreateEvent mayhem/quote flags on pre-exec
@@ -2239,6 +2275,7 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
           receivedNs: receivedNs.toString(),
           decodedNs: decodedNs.toString(),
         }).catch((e) => console.error("[pre] handle", e));
+        noteFlowWire();
       } catch (e) {
         console.error("[pre] parse err", e);
       }
@@ -2384,6 +2421,7 @@ async function startTxSubscribeListener(ctx: SnipeCtx): Promise<boolean> {
       }
 
       if (msg.method !== "transactionNotification") return;
+      const flowObservedAt = Date.now();
       try {
         const receivedNs = nowNs();
         const result = msg.params?.result;
@@ -2447,6 +2485,40 @@ async function startTxSubscribeListener(ctx: SnipeCtx): Promise<boolean> {
             /* */
           }
         }
+        const txRaw =
+          typeof tx?.transaction === "string"
+            ? tx.transaction
+            : Array.isArray(tx?.transaction)
+              ? tx.transaction[0]
+              : typeof tx?.transaction?.transaction?.[0] === "string"
+                ? tx.transaction.transaction[0]
+                : null;
+        const flowBytes = txRaw ? Buffer.from(txRaw, "base64") : null;
+        setImmediate(() => {
+          try {
+            const collector = require("./research/wallet-flow-collector.js");
+            if (logs.length) {
+              collector.noteLogs({
+                logs,
+                txSignature: sig || null,
+                slot,
+                source: "helius_processed",
+                observedAt: flowObservedAt,
+              });
+            }
+            if (flowBytes) {
+              collector.noteWireTransaction({
+                bytes: flowBytes,
+                txSignature: sig || null,
+                slot,
+                source: "helius_processed",
+                observedAt: flowObservedAt,
+              });
+            }
+          } catch (err) {
+            console.warn("[wallet-flow] research warning", (err as Error).message);
+          }
+        });
         if (!meta) return;
         handleCreate(ctx, meta, sig || "txsub", {
           source: "txsub",

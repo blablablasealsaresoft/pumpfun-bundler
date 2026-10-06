@@ -343,6 +343,12 @@ export function logDecisionTrace(t: DecisionTrace) {
   } catch (err) {
     console.warn("[V3] decision stamp failed", (err as Error).message);
   }
+  try {
+    // Research telemetry only. Does not move the live cutoff or submit a trade.
+    require("./research/wallet-flow-collector.js").noteDecision(t);
+  } catch (err) {
+    console.warn("[wallet-flow] research warning", (err as Error).message);
+  }
   if (t.decision === "skip") {
     console.log(
       `[decision] SKIP ${t.mint.slice(0, 8)}… reason=${t.skipReason} score=${
