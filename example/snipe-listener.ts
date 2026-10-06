@@ -1573,6 +1573,22 @@ async function handleCreate(
     console.warn("[V3] source note failed", (err as Error).message);
   }
 
+  try {
+    // Research registration only. In-memory; no RPC and no effect on the decision.
+    require("./research/wallet-flow-collector.js").noteCandidate({
+      mint: mintStr,
+      createSignature: signature,
+      creator: meta.creator,
+      deployer: meta.user,
+      quoteMint: meta.quoteMint,
+      mayhem: meta.isMayhem,
+      observedAt: Date.now(),
+      source,
+    });
+  } catch (err) {
+    console.warn("[wallet-flow] research warning", (err as Error).message);
+  }
+
   if (seen.has(mintStr) || skipMints.has(mintStr)) {
     if (skipMints.has(mintStr)) console.log(`[skip] our mint ${mintStr}`);
     return;
@@ -2193,10 +2209,30 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
 
       try {
         const receivedNs = nowNs();
+        const flowObservedAt = Date.now();
         const frame = parsePreprocessedFrame(Buffer.from(data as Buffer));
         if (!frame) return;
         const decoded = decodeCreateFromWireTx(frame.txBytes, PUMP_PROGRAM);
-        if (!decoded) return;
+        const flowBytes = Buffer.from(frame.txBytes);
+        const noteFlowWire = () => {
+          setImmediate(() => {
+            try {
+              require("./research/wallet-flow-collector.js").noteWireTransaction({
+                bytes: flowBytes,
+                txSignature: frame.signature,
+                slot: frame.slot,
+                source: "helius_preprocessed",
+                observedAt: flowObservedAt,
+              });
+            } catch (err) {
+              console.warn("[wallet-flow] research warning", (err as Error).message);
+            }
+          });
+        };
+        if (!decoded) {
+          noteFlowWire();
+          return;
+        }
         const decodedNs = nowNs();
 
         // Light filters only — no CreateEvent mayhem/quote flags on pre-exec
@@ -2239,6 +2275,7 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
           receivedNs: receivedNs.toString(),
           decodedNs: decodedNs.toString(),
         }).catch((e) => console.error("[pre] handle", e));
+        noteFlowWire();
       } catch (e) {
         console.error("[pre] parse err", e);
       }
@@ -2257,12 +2294,68 @@ async function startPreprocessedListener(ctx: SnipeCtx): Promise<boolean> {
 }
 
 
+function enqueueWalletFlow(input: {
+  logs?: string[];
+  bytes?: Buffer | null;
+  txSignature?: string | null;
+  slot?: number;
+  source: string;
+  observedAt: number;
+  loadedWritable?: string[];
+  loadedReadonly?: string[];
+}) {
+  const captured = {
+    logs: input.logs ? input.logs.slice() : [],
+    bytes: input.bytes ? Buffer.from(input.bytes) : null,
+    txSignature: input.txSignature || null,
+    slot: input.slot,
+    source: input.source,
+    observedAt: input.observedAt,
+    loadedWritable: input.loadedWritable,
+    loadedReadonly: input.loadedReadonly,
+  };
+  setImmediate(() => {
+    try {
+      const collector = require("./research/wallet-flow-collector.js");
+      if (captured.logs.length) {
+        collector.noteLogs({
+          logs: captured.logs,
+          txSignature: captured.txSignature,
+          slot: captured.slot,
+          source: captured.source,
+          observedAt: captured.observedAt,
+        });
+      }
+      if (captured.bytes) {
+        collector.noteWireTransaction({
+          bytes: captured.bytes,
+          txSignature: captured.txSignature,
+          slot: captured.slot,
+          source: captured.source,
+          observedAt: captured.observedAt,
+          loadedWritable: captured.loadedWritable,
+          loadedReadonly: captured.loadedReadonly,
+        });
+      }
+    } catch (err) {
+      console.warn("[wallet-flow] research warning", (err as Error).message);
+    }
+  });
+}
+
 async function startLogsListener(ctx: SnipeCtx) {
   console.log("Listener: logsSubscribe @ confirmed (Helius WS)");
   ctx.connection.onLogs(
     PUMP_PROGRAM,
     async ({ logs, err, signature }) => {
       if (err) return;
+      const flowObservedAt = Date.now();
+      enqueueWalletFlow({
+        logs,
+        txSignature: signature,
+        source: "logs",
+        observedAt: flowObservedAt,
+      });
       if (!isPumpCreateLog(logs)) return;
       const receivedNs = nowNs();
       const meta = parseCreateEvent(logs);
@@ -2384,6 +2477,7 @@ async function startTxSubscribeListener(ctx: SnipeCtx): Promise<boolean> {
       }
 
       if (msg.method !== "transactionNotification") return;
+      const flowObservedAt = Date.now();
       try {
         const receivedNs = nowNs();
         const result = msg.params?.result;
@@ -2447,6 +2541,40 @@ async function startTxSubscribeListener(ctx: SnipeCtx): Promise<boolean> {
             /* */
           }
         }
+        const txRaw =
+          typeof tx?.transaction === "string"
+            ? tx.transaction
+            : Array.isArray(tx?.transaction)
+              ? tx.transaction[0]
+              : typeof tx?.transaction?.transaction?.[0] === "string"
+                ? tx.transaction.transaction[0]
+                : null;
+        const flowBytes = txRaw ? Buffer.from(txRaw, "base64") : null;
+        setImmediate(() => {
+          try {
+            const collector = require("./research/wallet-flow-collector.js");
+            if (logs.length) {
+              collector.noteLogs({
+                logs,
+                txSignature: sig || null,
+                slot,
+                source: "helius_processed",
+                observedAt: flowObservedAt,
+              });
+            }
+            if (flowBytes) {
+              collector.noteWireTransaction({
+                bytes: flowBytes,
+                txSignature: sig || null,
+                slot,
+                source: "helius_processed",
+                observedAt: flowObservedAt,
+              });
+            }
+          } catch (err) {
+            console.warn("[wallet-flow] research warning", (err as Error).message);
+          }
+        });
         if (!meta) return;
         handleCreate(ctx, meta, sig || "txsub", {
           source: "txsub",
@@ -2550,10 +2678,6 @@ async function startGeyserListener(ctx: SnipeCtx): Promise<boolean> {
           info.meta?.log_messages ||
           wrap.meta?.logMessages ||
           [];
-        if (!metaLogs.length || !isPumpCreateLog(metaLogs)) return;
-        const meta = parseCreateEvent(metaLogs);
-        if (!meta) return;
-
         let sig = "geyser";
         try {
           const rawSig =
@@ -2568,6 +2692,16 @@ async function startGeyserListener(ctx: SnipeCtx): Promise<boolean> {
         } catch {
           /* keep geyser */
         }
+        const flowObservedAt = Date.now();
+        enqueueWalletFlow({
+          logs: metaLogs,
+          txSignature: sig,
+          source: "geyser",
+          observedAt: flowObservedAt,
+        });
+        if (!metaLogs.length || !isPumpCreateLog(metaLogs)) return;
+        const meta = parseCreateEvent(metaLogs);
+        if (!meta) return;
 
         const receivedNs = nowNs();
         handleCreate(ctx, meta, sig, {
