@@ -47,34 +47,8 @@ function load() {
     } catch {
       continue;
     }
-    if (row.type === "wallet_flow_launch") {
-      flow.noteCandidate(book, row);
-      if (row.decisionCutoffAt != null) {
-        const launch = book.launches.get(row.mint);
-        if (launch && launch.decisionCutoffAt == null) launch.decisionCutoffAt = row.decisionCutoffAt;
-        if (launch) {
-          launch.sourceCountAtDecision = row.sourceCountAtDecision;
-          launch.deployerEvidenceN = row.deployerEvidenceN;
-          launch.deployerRawQuality = row.deployerRawQuality;
-          launch.pnl = row.pnl;
-          launch.mfe = row.mfe;
-          launch.mae = row.mae;
-          launch.runner10 = row.runner10;
-          launch.outcomeObservedAt = row.outcomeObservedAt;
-          launch.mayhem = row.mayhem === true;
-          launch.firstObservedAt = row.firstObservedAt;
-        }
-      }
-    } else if (row.type === "wallet_flow_event") {
-      flow.observeFlow(book, row);
-    } else if (row.type === "wallet_flow_outcome") {
-      const launch = book.launches.get(row.mint);
-      if (!launch) continue;
-      launch.pnl = row.pnl;
-      launch.mfe = row.mfe;
-      launch.mae = row.mae;
-      launch.runner10 = row.runner10;
-      launch.outcomeObservedAt = row.outcomeObservedAt;
+    if (row.type === "wallet_flow_launch" || row.type === "wallet_flow_event" || row.type === "wallet_flow_source" || row.type === "wallet_flow_outcome") {
+      flow.ingestRecord(book, row);
     }
   }
 }
@@ -110,6 +84,7 @@ function noteDecision(trace) {
       deployerEvidenceN: row.deployerEvidenceN,
       deployerRawQuality: row.deployerRawQuality,
       featureVersion: flow.FEATURE_VERSION,
+      collectorFixVersion: flow.COLLECTOR_FIX_VERSION,
       researchEpoch: flow.RESEARCH_EPOCH,
     });
   }
@@ -144,7 +119,28 @@ function noteFlow(input) {
     quoteMint: input.quoteMint || launch.quoteMint || null,
   });
   if (result.accepted) append({ type: "wallet_flow_event", ...result.event });
-  else if (result.duplicate) append({ type: "wallet_flow_source", txSignature: input.txSignature, mint: input.mint, source: input.source, observedAt: input.observedAt });
+  else if (result.duplicate) {
+    append({
+      type: "wallet_flow_source",
+      txSignature: input.txSignature,
+      mint: input.mint,
+      source: input.source,
+      observedAt: input.observedAt,
+      side: input.side,
+      wallet: input.wallet || null,
+      quoteRaw: input.quoteRaw,
+      tokenRaw: input.tokenRaw,
+      wireSol: input.wireSol,
+      quoteAmount: input.quoteAmount,
+      tokenAmount: input.tokenAmount,
+      quoteMint: input.quoteMint || null,
+      quoteDecimals: input.quoteDecimals,
+      isCreator: input.isCreator === true,
+      isDeployer: input.isDeployer === true,
+      eventConfidence: input.eventConfidence,
+      featureVersion: flow.FEATURE_VERSION,
+    });
+  }
   return result;
 }
 
@@ -153,38 +149,26 @@ const PUMP_PROGRAM_ID = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
 function noteWireTransaction(input) {
   load();
   if (!input || !input.bytes) return [];
-  let tx;
-  try {
-    tx = require("@solana/web3.js").VersionedTransaction.deserialize(input.bytes);
-  } catch {
-    return [];
-  }
-  const keys = tx.message.staticAccountKeys.map((key) => key.toBase58());
-  const numSigners = tx.message.header.numRequiredSignatures;
+  const decoded = decodeWireMessage(input.bytes, input.loadedWritable, input.loadedReadonly);
+  if (!decoded) return [];
   const out = [];
-  for (const ix of tx.message.compiledInstructions) {
-    const program = keys[ix.programIdIndex];
+  for (const ix of decoded.ixs) {
+    const program = decoded.keys[ix.programIdIndex];
     if (program !== PUMP_PROGRAM_ID) continue;
-    const accountKeys = [];
-    let unresolved = false;
-    for (const index of ix.accountKeyIndexes) {
-      if (!keys[index]) {
-        unresolved = true;
-        break;
-      }
-      accountKeys.push(keys[index]);
-    }
-    if (unresolved) continue;
-    const parsed = flow.flowFromBuyInstruction(accountKeys, Buffer.from(ix.data), numSigners);
+    const accountKeys = ix.accountKeyIndexes.map((index) => decoded.keys[index] || null);
+    if (!accountKeys[2]) continue;
+    const parsed = flow.flowFromBuyInstruction(accountKeys, ix.data, decoded.numSigners, ix.accountKeyIndexes);
     if (!parsed || !parsed.mint || !book.launches.has(parsed.mint)) continue;
     out.push(
       noteFlow({
         mint: parsed.mint,
         wallet: parsed.wallet,
         side: parsed.side,
-        quoteAmount: parsed.wireSol,
         quoteRaw: parsed.quoteRaw,
-        tokenAmount: parsed.tokenRaw != null ? parsed.tokenRaw / 1e6 : null,
+        tokenRaw: parsed.tokenRaw,
+        wireSol: parsed.wireSol,
+        quoteAmount: parsed.wireSol,
+        tokenAmount: null,
         eventConfidence: parsed.eventConfidence,
         txSignature: input.txSignature || null,
         chainSlot: input.slot,
@@ -195,6 +179,43 @@ function noteWireTransaction(input) {
     );
   }
   return out;
+}
+
+function decodeWireMessage(bytes, loadedWritable, loadedReadonly) {
+  const web3 = require("@solana/web3.js");
+  const extra = []
+    .concat(loadedWritable || [])
+    .concat(loadedReadonly || [])
+    .filter((key) => typeof key === "string");
+  try {
+    const tx = web3.VersionedTransaction.deserialize(bytes);
+    return {
+      numSigners: tx.message.header.numRequiredSignatures,
+      keys: tx.message.staticAccountKeys.map((key) => key.toBase58()).concat(extra),
+      ixs: tx.message.compiledInstructions.map((ix) => ({
+        programIdIndex: ix.programIdIndex,
+        accountKeyIndexes: Array.from(ix.accountKeyIndexes),
+        data: Buffer.from(ix.data),
+      })),
+    };
+  } catch {
+    /* legacy message */
+  }
+  try {
+    const tx = web3.Transaction.from(bytes);
+    const msg = tx.compileMessage();
+    return {
+      numSigners: msg.header.numRequiredSignatures,
+      keys: msg.accountKeys.map((key) => key.toBase58()).concat(extra),
+      ixs: msg.compiledInstructions.map((ix) => ({
+        programIdIndex: ix.programIdIndex,
+        accountKeyIndexes: Array.from(ix.accountKeyIndexes),
+        data: Buffer.from(ix.data),
+      })),
+    };
+  } catch {
+    return null;
+  }
 }
 
 function noteLogs(input) {
@@ -209,7 +230,7 @@ function noteLogs(input) {
       side: parsed.side,
       quoteRaw: parsed.quoteRaw,
       tokenRaw: parsed.tokenRaw,
-      tokenAmount: parsed.tokenRaw != null ? parsed.tokenRaw / 1e6 : null,
+      tokenAmount: null,
       eventConfidence: parsed.eventConfidence,
       txSignature: input.txSignature,
       chainSlot: input.slot,

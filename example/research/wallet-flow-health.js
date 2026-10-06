@@ -13,57 +13,53 @@ const flow = require("./wallet-flow-v1");
 function bookFromFile(file) {
   const book = flow.emptyBook();
   if (!file || !fs.existsSync(file)) return book;
-  for (const row of loadJsonl(file)) {
-    if (row.type === "wallet_flow_launch") {
-      flow.noteCandidate(book, row);
-      const launch = book.launches.get(row.mint);
-      if (!launch) continue;
-      if (launch.decisionCutoffAt == null && row.decisionCutoffAt != null) launch.decisionCutoffAt = row.decisionCutoffAt;
-      if (row.firstObservedAt != null) launch.firstObservedAt = Math.min(launch.firstObservedAt || row.firstObservedAt, row.firstObservedAt);
-      launch.creator = launch.creator || row.creator;
-      launch.deployer = launch.deployer || row.deployer;
-      launch.quoteMint = launch.quoteMint || row.quoteMint;
-      launch.mayhem = launch.mayhem || row.mayhem === true;
-      launch.sourceCountAtDecision = row.sourceCountAtDecision != null ? row.sourceCountAtDecision : launch.sourceCountAtDecision;
-      launch.deployerEvidenceN = row.deployerEvidenceN != null ? row.deployerEvidenceN : launch.deployerEvidenceN;
-      launch.pnl = row.pnl != null ? row.pnl : launch.pnl;
-      launch.mfe = row.mfe != null ? row.mfe : launch.mfe;
-      launch.mae = row.mae != null ? row.mae : launch.mae;
-      launch.outcomeObservedAt = row.outcomeObservedAt != null ? row.outcomeObservedAt : launch.outcomeObservedAt;
-    } else if (row.type === "wallet_flow_event") {
-      flow.observeFlow(book, row);
-    } else if (row.type === "wallet_flow_source") {
-      book.rawObservations = (book.rawObservations || 0) + 1;
-    } else if (row.type === "wallet_flow_outcome") {
-      const launch = book.launches.get(row.mint);
-      if (!launch) continue;
-      launch.pnl = row.pnl;
-      launch.mfe = row.mfe;
-      launch.mae = row.mae;
-      launch.runner10 = row.runner10;
-      launch.outcomeObservedAt = row.outcomeObservedAt;
-    }
-  }
+  for (const row of loadJsonl(file)) flow.ingestRecord(book, row);
   return book;
 }
 
+function pct(x) {
+  return typeof x === "number" && Number.isFinite(x) ? (x * 100).toFixed(1) + "%" : "n/a";
+}
+
 function formatHealth(h) {
+  const q = h.flowAmountQuality || {};
+  const w = h.walletResolution || {};
+  const s = h.sourceCoverage || {};
   const lines = [
     "WALLET FLOW HEALTH",
     "epoch: " + h.epoch,
     "feature version: " + h.featureVersion,
+    "collector fix: " + h.collectorFixVersion,
+    "prior feature version excluded: " + h.priorFeatureVersion,
+    "corrected boundary ms: " + (h.correctedBoundaryAt == null ? "n/a" : h.correctedBoundaryAt),
     "prior epoch left unchanged: " + h.priorEpochUnchanged,
     "launches observed: " + h.launches,
+    "pre-fix launches excluded: " + h.preFixExcludedLaunches,
+    "pre-fix events excluded: " + h.preFixExcludedEvents,
     "flow tx observed: " + h.flowTxObserved,
     "deduped transactions: " + h.dedupedTransactions,
-    "100ms launches with independent flow: " + h.w100.launchesWithIndependentFlow + " decision-eligible: " + h.w100.decisionEligible + " unique values: " + h.w100.uniqueValueCount,
-    "250ms launches with independent flow: " + h.w250.launchesWithIndependentFlow + " decision-eligible: " + h.w250.decisionEligible + " unique values: " + h.w250.uniqueValueCount,
-    "500ms launches with independent flow: " + h.w500.launchesWithIndependentFlow + " decision-eligible: " + h.w500.decisionEligible + " unique values: " + h.w500.uniqueValueCount,
+    "source merges: " + h.sourceMerges,
+    "wallet resolved rate: " + pct(h.walletResolvedRate),
+    "amount resolved rate: " + pct(h.amountResolvedRate),
+    "100ms independent launches: " + h.w100.launchesWithIndependentFlow + " decision-eligible: " + h.w100.decisionEligible + " coverage: " + pct(h.w100.independentFlowCoverage) + " unique values: " + h.w100.uniqueValueCount,
+    "250ms independent launches: " + h.w250.launchesWithIndependentFlow + " decision-eligible: " + h.w250.decisionEligible + " coverage: " + pct(h.w250.independentFlowCoverage) + " unique values: " + h.w250.uniqueValueCount,
+    "500ms independent launches: " + h.w500.launchesWithIndependentFlow + " decision-eligible: " + h.w500.decisionEligible + " coverage: " + pct(h.w500.independentFlowCoverage) + " unique values: " + h.w500.uniqueValueCount,
+    "100ms amount launches gross/net/top/creator: " + h.w100.grossBuySol + "/" + h.w100.netBuySol + "/" + h.w100.topBuyerShare + "/" + h.w100.creatorShareOfBuyFlow,
+    "250ms amount launches gross/net/top/creator: " + h.w250.grossBuySol + "/" + h.w250.netBuySol + "/" + h.w250.topBuyerShare + "/" + h.w250.creatorShareOfBuyFlow,
+    "500ms amount launches gross/net/top/creator: " + h.w500.grossBuySol + "/" + h.w500.netBuySol + "/" + h.w500.topBuyerShare + "/" + h.w500.creatorShareOfBuyFlow,
+    "source helius_preprocessed: " + (s.helius_preprocessed || 0),
+    "source helius_processed: " + (s.helius_processed || 0),
+    "source geyser: " + (s.geyser || 0),
+    "source logs: " + (s.logs || 0),
+    "source overlap: " + h.sourceOverlap,
+    "flow_amount_quality events_total=" + q.events_total + " quote_raw_present=" + q.quote_raw_present + " quote_amount_resolved=" + q.quote_amount_resolved + " sol_amount_resolved=" + q.sol_amount_resolved + " custom_quote_raw_present=" + q.custom_quote_raw_present + " unknown_amount=" + q.unknown_amount,
+    "wallet_resolution flow_buys=" + w.flow_buys + " wallet_present=" + w.wallet_present + " wallet_missing=" + w.wallet_missing + " creator_wallet=" + w.creator_wallet + " deployer_wallet=" + w.deployer_wallet + " non_creator_wallet=" + w.non_creator_wallet,
     "creator-only flow count: " + h.creatorOnlyFlow,
     "non-creator flow count: " + h.nonCreatorFlow,
     "wallet-history coverage: " + h.walletHistoryCoverage,
     "late-only flow count: " + h.lateOnlyFlow,
     "leakage violations: " + h.leakageViolations,
+    "pre-fix 6.1% early-flow estimate is not the corrected sample",
   ];
   return lines.join("\n");
 }

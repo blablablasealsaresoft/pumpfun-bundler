@@ -323,6 +323,182 @@ test("buy instruction decoder does not invent a wallet", () => {
   assert.ok(parsed.eventConfidence < 0.7);
 });
 
+test("trade log retains quoteRaw and tokenRaw on the flow event", () => {
+  const { PublicKey } = require("@solana/web3.js");
+  const mint = new PublicKey(flow.SOL_MINT);
+  const user = new PublicKey(flow.USDC_MINT);
+  const buf = Buffer.alloc(8 + 32 + 8 + 8 + 1 + 32);
+  flow.TRADE_DISC.copy(buf, 0);
+  mint.toBuffer().copy(buf, 8);
+  buf.writeBigUInt64LE(1_500_000_000n, 40);
+  buf.writeBigUInt64LE(2_500_000n, 48);
+  buf[56] = 1;
+  user.toBuffer().copy(buf, 57);
+  const parsed = flow.parseTradeEventLog("Program data: " + buf.toString("base64"));
+  assert.strictEqual(parsed.quoteRaw, 1_500_000_000);
+  assert.strictEqual(parsed.tokenRaw, 2_500_000);
+  const book = flow.emptyBook();
+  launch(book, { cutoff: 2_000 });
+  const saved = flow.observeFlow(book, { mint: "MintA", txSignature: "LogTx", wallet: parsed.wallet, side: parsed.side, quoteRaw: parsed.quoteRaw, tokenRaw: parsed.tokenRaw, observedAt: 1_100, source: "helius_processed" });
+  assert.strictEqual(saved.event.quoteRaw, 1_500_000_000);
+  assert.strictEqual(saved.event.tokenRaw, 2_500_000);
+  assert.strictEqual(flow.buildRows(book)[0].walletFlow500.grossBuySol, 1.5);
+});
+
+test("duplicate observations backfill amounts and do not erase stronger fields", () => {
+  const book = flow.emptyBook();
+  launch(book, { cutoff: 3_000 });
+  const wire = flow.observeFlow(book, { mint: "MintA", txSignature: "Merge", wallet: null, side: "buy", wireSol: 0.4, quoteRaw: 400_000_000, observedAt: 1_100, source: "helius_preprocessed" });
+  assert.strictEqual(wire.event.quoteRaw, 400_000_000);
+  const logged = flow.observeFlow(book, { mint: "MintA", txSignature: "Merge", wallet: "BuyerA", side: "buy", tokenRaw: 10, observedAt: 1_140, source: "helius_processed" });
+  assert.strictEqual(logged.duplicate, true);
+  assert.strictEqual(logged.event.quoteRaw, 400_000_000);
+  assert.strictEqual(logged.event.wireSol, 0.4);
+  assert.strictEqual(logged.event.tokenRaw, 10);
+  assert.strictEqual(logged.event.wallet, "BuyerA");
+  const again = flow.observeFlow(book, { mint: "MintA", txSignature: "Merge", wallet: "BuyerA", side: "buy", observedAt: 1_180, source: "logs" });
+  assert.strictEqual(again.event.quoteRaw, 400_000_000);
+  assert.strictEqual(again.event.logsObservedAt, 1_180);
+  assert.strictEqual(book.events.size, 1);
+});
+
+test("Pump buy recovers the user at instruction index 6 with one signer", () => {
+  const src = fs.readFileSync(path.join(__dirname, "wallet-flow-v1.js"), "utf8");
+  assert.ok(!src.includes("numSigners > 6"));
+  const keys = ["g", "fee", "Mint", "curve", "abc", "ata", "UserWallet", "system"];
+  const data = Buffer.alloc(24);
+  data.write("66063d1201daebea", 0, "hex");
+  data.writeBigUInt64LE(10n, 8);
+  data.writeBigUInt64LE(2_000_000_000n, 16);
+  const parsed = flow.flowFromBuyInstruction(keys, data, 1, [0, 1, 2, 3, 4, 5, 0, 7]);
+  assert.strictEqual(parsed.wallet, "UserWallet");
+  assert.strictEqual(parsed.walletIsSigner, true);
+  assert.strictEqual(parsed.quoteRaw, 2_000_000_000);
+  const missing = flow.flowFromBuyInstruction(["g", "fee", "Mint", null, null, null, null], data, 1, [0, 1, 2, 9, 9, 9, 9]);
+  assert.strictEqual(missing.wallet, null);
+  assert.ok(missing.eventConfidence < 0.7);
+});
+
+test("versioned buy with one required signer resolves instruction account 6", () => {
+  const os = require("os");
+  const collector = require("./wallet-flow-collector");
+  const web3 = require("@solana/web3.js");
+  const file = path.join(os.tmpdir(), "wallet-flow-v1_1-test.jsonl");
+  fs.writeFileSync(file, "");
+  collector.setTracePath(file);
+  collector.resetForTests();
+  const user = web3.Keypair.generate();
+  const mint = web3.Keypair.generate();
+  const ixKeys = [];
+  for (let i = 0; i < 8; i++) {
+    ixKeys.push(i === 2 ? mint.publicKey : i === 6 ? user.publicKey : web3.Keypair.generate().publicKey);
+  }
+  const data = Buffer.alloc(24);
+  data.write("66063d1201daebea", 0, "hex");
+  data.writeBigUInt64LE(1n, 8);
+  data.writeBigUInt64LE(250_000_000n, 16);
+  const ix = new web3.TransactionInstruction({
+    programId: new web3.PublicKey("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"),
+    keys: ixKeys.map((pubkey) => ({ pubkey, isSigner: pubkey.equals(user.publicKey), isWritable: true })),
+    data,
+  });
+  const message = new web3.TransactionMessage({
+    payerKey: user.publicKey,
+    recentBlockhash: web3.Keypair.generate().publicKey.toBase58(),
+    instructions: [ix],
+  }).compileToV0Message();
+  const tx = new web3.VersionedTransaction(message);
+  tx.sign([user]);
+  assert.strictEqual(tx.message.header.numRequiredSignatures, 1);
+  collector.noteCandidate({ mint: mint.publicKey.toBase58(), createSignature: "Create", creator: "Creator", observedAt: 1_000, quoteMint: flow.SOL_MINT });
+  collector.noteDecision({ mint: mint.publicKey.toBase58(), ts: 2_000, sourceCountAtDecision: 2 });
+  const noted = collector.noteWireTransaction({ bytes: Buffer.from(tx.serialize()), txSignature: "WireSig", source: "helius_preprocessed", observedAt: 1_100 });
+  assert.strictEqual(noted.length, 1);
+  assert.strictEqual(noted[0].event.wallet, user.publicKey.toBase58());
+  assert.strictEqual(noted[0].event.quoteRaw, 250_000_000);
+  const row = flow.buildRows(collector.getBook())[0];
+  assert.strictEqual(row.sourceCountAtDecision, 2);
+  assert.strictEqual(flow.featureValue(row, "listener.sourceCountAtDecision"), 2);
+  assert.strictEqual(row.walletFlow500.uniqueNonCreatorBuyers, 1);
+  assert.strictEqual(row.walletFlow500.grossBuySol, 0.25);
+});
+
+test("geyser and logs trades reach the collector before create-only filtering", () => {
+  const listener = fs.readFileSync(path.join(__dirname, "..", "snipe-listener.ts"), "utf8");
+  const logsAt = listener.indexOf("async function startLogsListener");
+  const txAt = listener.indexOf("async function startTxSubscribeListener");
+  const geyserAt = listener.indexOf("async function startGeyserListener");
+  const mainAt = listener.indexOf("async function main");
+  const logsFn = listener.slice(logsAt, txAt);
+  const geyserFn = listener.slice(geyserAt, mainAt);
+  assert.ok(logsFn.indexOf("enqueueWalletFlow") < logsFn.indexOf("isPumpCreateLog"));
+  assert.ok(logsFn.includes("isPumpCreateLog"));
+  assert.ok(geyserFn.indexOf("enqueueWalletFlow") < geyserFn.indexOf("isPumpCreateLog"));
+  assert.ok(geyserFn.includes("isPumpCreateLog"));
+  const os = require("os");
+  const collector = require("./wallet-flow-collector");
+  const { PublicKey } = require("@solana/web3.js");
+  const mint = new PublicKey(flow.SOL_MINT);
+  const user = new PublicKey("11111111111111111111111111111111");
+  collector.setTracePath(path.join(os.tmpdir(), "wallet-flow-sensors.jsonl"));
+  collector.resetForTests();
+  collector.noteCandidate({ mint: mint.toBase58(), createSignature: "CG", creator: "Creator", observedAt: 1_000 });
+  collector.noteDecision({ mint: mint.toBase58(), ts: 5_000 });
+  function line(sigRaw) {
+    const buf = Buffer.alloc(8 + 32 + 8 + 8 + 1 + 32);
+    flow.TRADE_DISC.copy(buf, 0);
+    mint.toBuffer().copy(buf, 8);
+    buf.writeBigUInt64LE(sigRaw, 40);
+    buf.writeBigUInt64LE(1n, 48);
+    buf[56] = 1;
+    user.toBuffer().copy(buf, 57);
+    return "Program data: " + buf.toString("base64");
+  }
+  collector.noteLogs({ logs: [line(100_000_000n)], txSignature: "SameTrade", source: "geyser", observedAt: 1_200 });
+  collector.noteLogs({ logs: [line(100_000_000n)], txSignature: "SameTrade", source: "logs", observedAt: 1_300 });
+  collector.noteLogs({ logs: [line(100_000_000n)], txSignature: "SameTrade", source: "helius_processed", observedAt: 1_250 });
+  const book = collector.getBook();
+  assert.strictEqual(book.events.size, 1);
+  const event = [...book.events.values()][0];
+  assert.strictEqual(event.geyserObservedAt, 1_200);
+  assert.strictEqual(event.logsObservedAt, 1_300);
+  assert.strictEqual(event.processedObservedAt, 1_250);
+  assert.strictEqual(event.quoteRaw, 100_000_000);
+  assert.strictEqual(event.sourceCount, 3);
+  const infra = fs.readFileSync(path.join(__dirname, "..", "snipe-infra.ts"), "utf8");
+  const decisionAt = infra.indexOf("export function logDecisionTrace");
+  const decisionFn = infra.slice(decisionAt, infra.indexOf("export {", decisionAt));
+  assert.ok(decisionFn.includes("v3Snapshot.sourceCountAtDecision"));
+  assert.ok(!/\bt\.sourceCountAtDecision\s*=/.test(decisionFn));
+  assert.ok(!/sendTransaction\s*\(/.test(listener.slice(listener.indexOf("function enqueueWalletFlow"), logsAt)));
+});
+
+test("pre-fix feature version is excluded and merged amounts rank buyers", () => {
+  const book = flow.emptyBook();
+  flow.noteCandidate(book, { mint: "Old", createSignature: "OldSig", featureVersion: flow.PRIOR_FEATURE_VERSION, observedAt: 500, creator: "Creator" });
+  flow.noteDecision(book, { mint: "Old", ts: 800, skipReason: "shadow|outcome", ret30s: 5, mfe30s: 5, mae30s: -1 });
+  flow.observeFlow(book, { mint: "Old", featureVersion: flow.PRIOR_FEATURE_VERSION, txSignature: "OldTx", wallet: "W", side: "buy", quoteRaw: 1_000_000_000, observedAt: 600 });
+  launch(book, { mint: "New", createSignature: "NewSig", cutoff: 2_000, pnl: 1, mfe: 2, mae: -1 });
+  flow.observeFlow(book, { mint: "New", txSignature: "A", wallet: null, side: "buy", observedAt: 1_100, source: "helius_preprocessed" });
+  flow.observeFlow(book, { mint: "New", txSignature: "A", wallet: "A", side: "buy", quoteRaw: 300_000_000, observedAt: 1_120, source: "helius_processed" });
+  flow.observeFlow(book, { mint: "New", txSignature: "B", wallet: "B", side: "buy", quoteRaw: 100_000_000, observedAt: 1_140, source: "geyser" });
+  flow.observeFlow(book, { mint: "New", txSignature: "S", wallet: "A", side: "sell", quoteRaw: 50_000_000, observedAt: 1_160, source: "logs" });
+  const rows = flow.buildRows(book);
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].mint, "New");
+  assert.strictEqual(rows[0].featureVersion, "wallet_flow_v1_1");
+  const snap = rows[0].walletFlow500;
+  assert.strictEqual(snap.uniqueNonCreatorBuyers, 2);
+  assert.strictEqual(snap.grossBuySol, 0.4);
+  assert.ok(Math.abs(snap.netBuySol - 0.35) < 1e-9);
+  assert.ok(Math.abs(snap.topBuyerShare - 0.75) < 1e-9);
+  const late = flow.observeFlow(book, { mint: "New", txSignature: "Late", wallet: "Z", side: "buy", quoteRaw: 9_000_000_000, observedAt: 4_000 });
+  assert.ok(late.event.observedAt > rows[0].decisionCutoffAt);
+  const after = flow.buildRows(book)[0].walletFlow500;
+  assert.strictEqual(after.uniqueNonCreatorBuyers, 2);
+  assert.strictEqual(flow.featureValue(flow.buildRows(book)[0], "walletFlow500.uniqueNonCreatorBuyers"), 2);
+});
+
 console.log("");
 console.log("results: " + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);

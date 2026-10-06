@@ -25,8 +25,11 @@ function formatReport(rep) {
   lines.push("UNCHANGED");
   lines.push("epoch: " + flow.RESEARCH_EPOCH);
   lines.push("feature version: " + flow.FEATURE_VERSION);
+  lines.push("collector fix: " + flow.COLLECTOR_FIX_VERSION);
+  lines.push("prior feature version " + flow.PRIOR_FEATURE_VERSION + " is excluded from this primary sample");
+  lines.push("pre-fix early-flow coverage is not the corrected conclusion");
   lines.push("prior epoch " + flow.PRIOR_EPOCH + " was not rewritten");
-  lines.push("boundary: new rows start when wallet_flow_v1 collector notes the launch. Historical V3 rows stay in the prior epoch.");
+  lines.push("boundary: corrected rows start at feature version wallet_flow_v1_1. wallet_flow_v1 stays forensic only. Historical V3 rows stay in the prior epoch.");
   lines.push("");
   lines.push("status:");
   lines.push(rep.researchVerdict);

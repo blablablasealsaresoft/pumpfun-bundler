@@ -3,7 +3,9 @@
  *
  * Epoch selection_v3_walletflow_2026_10 starts with this collector.
  * selection_v3_shadow_2026_10 rows are not rewritten.
- * Feature version wallet_flow_v1 is stamped on new observations only.
+ * Feature version wallet_flow_v1_1 is stamped on corrected observations.
+ * wallet_flow_v1 rows stay in the file for forensics and are not pooled
+ * into the corrected primary sample.
  *
  * Create-transaction creator buys are stored separately and are not
  * independent post-create participation.
@@ -14,7 +16,9 @@
 
 const { mean, pctile, spearman, kendallTau, bootstrapMedianDiff, mulberry32 } = require("./math");
 
-const FEATURE_VERSION = "wallet_flow_v1";
+const FEATURE_VERSION = "wallet_flow_v1_1";
+const PRIOR_FEATURE_VERSION = "wallet_flow_v1";
+const COLLECTOR_FIX_VERSION = "wallet-identity-amount-sensors-2026-10-06";
 const RESEARCH_EPOCH = "selection_v3_walletflow_2026_10";
 const PRIOR_EPOCH = "selection_v3_shadow_2026_10";
 const SOL_MINT = "So11111111111111111111111111111111111111112";
@@ -52,7 +56,27 @@ function quoteIsSol(mint) {
 }
 
 function emptyBook() {
-  return { launches: new Map(), events: new Map(), rawObservations: 0 };
+  return { launches: new Map(), events: new Map(), rawObservations: 0, correctedObservations: 0 };
+}
+
+function isCorrectedVersion(version) {
+  return version === FEATURE_VERSION;
+}
+
+function knownQuoteDecimals(mint) {
+  if (!mint) return null;
+  if (mint === SOL_MINT || mint === "SOL") return 9;
+  if (mint === USDC_MINT) return 6;
+  return null;
+}
+
+function rawInt(v) {
+  if (typeof v === "bigint") {
+    const n = Number(v);
+    return Number.isSafeInteger(n) ? n : null;
+  }
+  if (typeof v === "number" && Number.isSafeInteger(v)) return v;
+  return null;
 }
 
 function launchKey(mint) {
@@ -70,7 +94,10 @@ function noteCandidate(book, input) {
   if (!row) {
     row = {
       researchEpoch: RESEARCH_EPOCH,
-      featureVersion: FEATURE_VERSION,
+      featureVersion: input.featureVersion || FEATURE_VERSION,
+      collectorFixVersion:
+        input.collectorFixVersion ||
+        (input.featureVersion && input.featureVersion !== FEATURE_VERSION ? null : COLLECTOR_FIX_VERSION),
       mint: input.mint,
       createSignature: input.createSignature || null,
       firstObservedAt: finite(input.observedAt) != null ? input.observedAt : finite(input.firstObservedAt),
@@ -123,9 +150,13 @@ function noteDecision(book, trace) {
 
 function mergeSource(event, input) {
   const source = input.source || "other";
-  event.sources[source] = finite(input.observedAt);
-  if (source === "helius_preprocessed") event.preObservedAt = finite(input.observedAt);
-  if (source === "helius_processed") event.processedObservedAt = finite(input.observedAt);
+  const at = finite(input.observedAt);
+  if (!event.sources) event.sources = {};
+  if (at != null && (event.sources[source] == null || at < event.sources[source])) event.sources[source] = at;
+  if (source === "helius_preprocessed" && at != null) event.preObservedAt = event.preObservedAt == null ? at : Math.min(event.preObservedAt, at);
+  if (source === "helius_processed" && at != null) event.processedObservedAt = event.processedObservedAt == null ? at : Math.min(event.processedObservedAt, at);
+  if (source === "geyser" && at != null) event.geyserObservedAt = event.geyserObservedAt == null ? at : Math.min(event.geyserObservedAt, at);
+  if (source === "logs" && at != null) event.logsObservedAt = event.logsObservedAt == null ? at : Math.min(event.logsObservedAt, at);
   const times = Object.values(event.sources).filter((t) => typeof t === "number");
   event.observedAt = times.length ? Math.min(...times) : event.observedAt;
   event.sourceCount = Object.keys(event.sources).length;
@@ -137,16 +168,42 @@ function mergeSource(event, input) {
   return event;
 }
 
+function backfillEvent(event, input) {
+  if (event.quoteRaw == null && rawInt(input.quoteRaw) != null) event.quoteRaw = rawInt(input.quoteRaw);
+  if (event.tokenRaw == null && rawInt(input.tokenRaw) != null) event.tokenRaw = rawInt(input.tokenRaw);
+  if (event.quoteAmount == null && finite(input.quoteAmount) != null) event.quoteAmount = input.quoteAmount;
+  if (event.tokenAmount == null && finite(input.tokenAmount) != null) event.tokenAmount = input.tokenAmount;
+  if (event.wireSol == null && finite(input.wireSol) != null) event.wireSol = input.wireSol;
+  if (!event.quoteMint && input.quoteMint) event.quoteMint = input.quoteMint;
+  if (event.quoteDecimals == null) {
+    const explicit = finite(input.quoteDecimals);
+    event.quoteDecimals = explicit != null ? explicit : knownQuoteDecimals(event.quoteMint);
+  }
+  if (input.isCreator === true) event.isCreator = true;
+  if (input.isDeployer === true) event.isDeployer = true;
+  if (finite(input.eventConfidence) != null) event.eventConfidence = Math.max(event.eventConfidence || 0, input.eventConfidence);
+  if (!event.wallet && input.wallet) event.wallet = input.wallet;
+  return event;
+}
+
+function countObservation(book, event) {
+  book.rawObservations = (book.rawObservations || 0) + 1;
+  if (event && isCorrectedVersion(event.featureVersion)) {
+    book.correctedObservations = (book.correctedObservations || 0) + 1;
+  }
+}
+
 function observeFlow(book, input) {
   if (!input || !input.mint) return { accepted: false, duplicate: false, event: null };
-  book.rawObservations = (book.rawObservations || 0) + 1;
   const side = input.side === "buy" || input.side === "sell" ? input.side : "unknown";
   const wallet = input.wallet || null;
   const normalized = { ...input, side, wallet };
   const key = eventKey(normalized);
   const existing = book.events.get(key);
   if (existing) {
+    backfillEvent(existing, normalized);
     mergeSource(existing, normalized);
+    countObservation(book, existing);
     return { accepted: false, duplicate: true, event: existing };
   }
   if (input.txSignature) {
@@ -155,26 +212,29 @@ function observeFlow(book, input) {
       if (event.txSignature === input.txSignature && event.mint === input.mint && event.side === side) same.push(event);
     }
     if (!wallet && same.length) {
+      backfillEvent(same[0], normalized);
       mergeSource(same[0], normalized);
+      countObservation(book, same[0]);
       return { accepted: false, duplicate: true, event: same[0] };
     }
     const blank = wallet ? same.find((event) => !event.wallet) : null;
     if (blank) {
       book.events.delete(eventKey(blank));
+      backfillEvent(blank, normalized);
       blank.wallet = wallet;
-      if (input.isCreator === true) blank.isCreator = true;
-      if (input.isDeployer === true) blank.isDeployer = true;
-      if (finite(input.quoteAmount) != null && blank.quoteAmount == null) blank.quoteAmount = input.quoteAmount;
-      if (finite(input.tokenAmount) != null && blank.tokenAmount == null) blank.tokenAmount = input.tokenAmount;
-      if (finite(input.eventConfidence) != null && input.eventConfidence > blank.eventConfidence) blank.eventConfidence = input.eventConfidence;
       mergeSource(blank, normalized);
       book.events.set(eventKey(blank), blank);
+      countObservation(book, blank);
       return { accepted: false, duplicate: true, event: blank };
     }
   }
+  const quoteMint = input.quoteMint || null;
   const event = {
     researchEpoch: RESEARCH_EPOCH,
-    featureVersion: FEATURE_VERSION,
+    featureVersion: input.featureVersion || FEATURE_VERSION,
+    collectorFixVersion:
+      input.collectorFixVersion ||
+      (input.featureVersion && input.featureVersion !== FEATURE_VERSION ? null : COLLECTOR_FIX_VERSION),
     mint: input.mint,
     createSignature: input.createSignature || null,
     observedAt: finite(input.observedAt),
@@ -183,10 +243,14 @@ function observeFlow(book, input) {
     source: input.source || "other",
     sources: {},
     txSignature: input.txSignature || null,
-    wallet: input.wallet || null,
-    side: input.side === "buy" || input.side === "sell" ? input.side : "unknown",
+    wallet,
+    side,
+    quoteRaw: rawInt(input.quoteRaw),
+    tokenRaw: rawInt(input.tokenRaw),
+    wireSol: finite(input.wireSol),
     quoteAmount: finite(input.quoteAmount),
-    quoteMint: input.quoteMint || null,
+    quoteMint,
+    quoteDecimals: finite(input.quoteDecimals) != null ? input.quoteDecimals : knownQuoteDecimals(quoteMint),
     tokenAmount: finite(input.tokenAmount),
     isCreator: input.isCreator === true ? true : input.isCreator === false ? false : null,
     isDeployer: input.isDeployer === true ? true : input.isDeployer === false ? false : null,
@@ -195,11 +259,14 @@ function observeFlow(book, input) {
     firstSource: input.source || "other",
     preObservedAt: null,
     processedObservedAt: null,
+    geyserObservedAt: null,
+    logsObservedAt: null,
     preToProcessedMs: null,
     sourceCount: 1,
   };
-  mergeSource(event, input);
-  book.events.set(key, event);
+  mergeSource(event, normalized);
+  book.events.set(eventKey(event), event);
+  countObservation(book, event);
   return { accepted: true, duplicate: false, event };
 }
 
@@ -226,21 +293,25 @@ function parseTradeEventLog(line) {
     mint,
     wallet,
     side: isBuy ? "buy" : "sell",
-    quoteRaw: Number(quoteRaw),
-    tokenRaw: Number(tokenRaw),
+    quoteRaw: rawInt(quoteRaw),
+    tokenRaw: rawInt(tokenRaw),
     eventConfidence: 0.9,
     parseSource: "trade_event",
   };
 }
 
-function flowFromBuyInstruction(accountKeys, data, numSigners) {
+function flowFromBuyInstruction(accountKeys, data, numSigners, accountIndexes) {
   const buf = Buffer.isBuffer(data) ? data : Buffer.from(data || []);
-  if (buf.length < 24 || !accountKeys || accountKeys.length < 3) return null;
+  if (buf.length < 24 || !accountKeys || accountKeys.length < 3 || !accountKeys[2]) return null;
   const family = BUY_DISC[buf.subarray(0, 8).toString("hex")];
   if (!family) return null;
-  const mint = accountKeys[2] || null;
-  let wallet = null;
-  if (accountKeys.length >= 7 && typeof numSigners === "number" && numSigners > 6) wallet = accountKeys[6] || null;
+  const mint = accountKeys[2];
+  // User is instruction account 6. Signer count is a separate message-header fact.
+  const wallet = accountKeys.length > 6 && accountKeys[6] ? accountKeys[6] : null;
+  let walletIsSigner = null;
+  if (wallet && Array.isArray(accountIndexes) && typeof numSigners === "number" && typeof accountIndexes[6] === "number") {
+    walletIsSigner = accountIndexes[6] >= 0 && accountIndexes[6] < numSigners;
+  }
   const a = buf.readBigUInt64LE(8);
   const b = buf.readBigUInt64LE(16);
   const lamports = family === "SOL_EXACT" ? a : b;
@@ -249,11 +320,12 @@ function flowFromBuyInstruction(accountKeys, data, numSigners) {
   return {
     mint,
     wallet,
+    walletIsSigner,
     side: "buy",
-    quoteRaw: Number(lamports),
-    tokenRaw: Number(tokens),
+    quoteRaw: rawInt(lamports),
+    tokenRaw: rawInt(tokens),
     wireSol: Number.isFinite(sol) && sol > 0 && sol <= 500 ? sol : null,
-    eventConfidence: wallet ? 0.7 : 0.4,
+    eventConfidence: wallet ? 0.75 : 0.4,
     parseSource: "buy_ix",
   };
 }
@@ -449,8 +521,10 @@ function researchRow(launch, events) {
 }
 
 function buildRows(book) {
-  const launches = [...book.launches.values()].filter((row) => finite(row.decisionCutoffAt) != null && finite(row.firstObservedAt) != null);
-  const events = [...book.events.values()];
+  const launches = [...book.launches.values()].filter(
+    (row) => isCorrectedVersion(row.featureVersion) && finite(row.decisionCutoffAt) != null && finite(row.firstObservedAt) != null
+  );
+  const events = [...book.events.values()].filter((event) => isCorrectedVersion(event.featureVersion));
   for (const launch of launches) {
     const buyers = [];
     for (const event of events) {
@@ -742,7 +816,7 @@ function evaluateBook(book) {
     leadLag: lag,
     models,
     variation: variationOf(primary, ACCESSOR_NAMES),
-    postDecisionSignalOnly: status === "POST_DECISION_SIGNAL_ONLY" || earlyCoverage < 0.1,
+    postDecisionSignalOnly: status === "POST_DECISION_SIGNAL_ONLY",
   };
 }
 
@@ -763,8 +837,10 @@ function strictPass(model) {
 
 function healthFromBook(book) {
   const rows = buildRows(book);
-  const events = [...book.events.values()];
-  const deduped = events.length;
+  const correctedEvents = [...book.events.values()].filter((event) => isCorrectedVersion(event.featureVersion));
+  const preFixEvents = [...book.events.values()].filter((event) => event.featureVersion && !isCorrectedVersion(event.featureVersion));
+  const correctedLaunches = [...book.launches.values()].filter((row) => isCorrectedVersion(row.featureVersion));
+  const deduped = correctedEvents.length;
   let leakageViolations = 0;
   for (const row of rows) {
     for (const windowMs of DECISION_WINDOWS) {
@@ -777,30 +853,80 @@ function healthFromBook(book) {
   function windowHealth(windowMs) {
     const snaps = rows.map((row) => row["walletFlow" + windowMs]).filter(Boolean);
     const values = snaps.map((snap) => snap.uniqueNonCreatorBuyers);
+    const eligible = snaps.filter((snap) => snap.decisionEligible).length;
     return {
       launchesWithIndependentFlow: snaps.filter((snap) => snap.uniqueNonCreatorBuyers > 0).length,
-      decisionEligible: snaps.filter((snap) => snap.decisionEligible).length,
+      decisionEligible: eligible,
       uniqueValueCount: new Set(values).size,
+      independentFlowCoverage: eligible ? snaps.filter((snap) => snap.decisionEligible && snap.uniqueNonCreatorBuyers > 0).length / eligible : 0,
+      grossBuySol: snaps.filter((snap) => snap.grossBuySol != null).length,
+      netBuySol: snaps.filter((snap) => snap.netBuySol != null).length,
+      topBuyerShare: snaps.filter((snap) => snap.topBuyerShare != null).length,
+      creatorShareOfBuyFlow: snaps.filter((snap) => snap.creatorShareOfBuyFlow != null).length,
     };
   }
   let creatorOnly = 0;
   let nonCreator = 0;
-  for (const event of events) {
+  const buys = correctedEvents.filter((event) => event.side === "buy" && !event.inCreateTransaction);
+  for (const event of correctedEvents) {
     if (event.side !== "buy") continue;
     if (event.inCreateTransaction) creatorOnly++;
     else nonCreator++;
   }
-  const late = events.filter((event) => {
+  const late = correctedEvents.filter((event) => {
     const launch = book.launches.get(launchKey(event.mint));
     return launch && finite(launch.decisionCutoffAt) != null && event.observedAt > launch.decisionCutoffAt && !event.inCreateTransaction;
   }).length;
+  const boundary = correctedLaunches.reduce((min, row) => {
+    const t = finite(row.firstObservedAt);
+    if (t == null) return min;
+    return min == null ? t : Math.min(min, t);
+  }, null);
+  const sourceNames = ["helius_preprocessed", "helius_processed", "geyser", "logs"];
+  const sourceCoverage = {};
+  for (const name of sourceNames) {
+    sourceCoverage[name] = correctedEvents.filter((event) => event.sources && event.sources[name] != null).length;
+  }
+  let quoteRawPresent = 0;
+  let quoteAmountResolved = 0;
+  let solAmountResolved = 0;
+  let customQuoteRaw = 0;
+  let unknownAmount = 0;
+  for (const event of correctedEvents) {
+    const hasRaw = rawInt(event.quoteRaw) != null;
+    const hasAmount = finite(event.quoteAmount) != null || finite(event.wireSol) != null;
+    if (hasRaw) quoteRawPresent++;
+    if (hasAmount || hasRaw) quoteAmountResolved++;
+    const sol = quoteIsSol(event.quoteMint) && (finite(event.quoteAmount) != null || finite(event.wireSol) != null || hasRaw);
+    if (sol) solAmountResolved++;
+    if (event.quoteMint && !quoteIsSol(event.quoteMint) && hasRaw) customQuoteRaw++;
+    if (!hasRaw && !hasAmount) unknownAmount++;
+  }
+  let walletPresent = 0;
+  let creatorWallet = 0;
+  let deployerWallet = 0;
+  let nonCreatorWallet = 0;
+  for (const event of buys) {
+    if (!event.wallet) continue;
+    walletPresent++;
+    if (event.isCreator === true) creatorWallet++;
+    else if (event.isDeployer === true) deployerWallet++;
+    else nonCreatorWallet++;
+  }
+  const correctedObservations = book.correctedObservations || deduped;
   return {
     epoch: RESEARCH_EPOCH,
     featureVersion: FEATURE_VERSION,
+    collectorFixVersion: COLLECTOR_FIX_VERSION,
+    priorFeatureVersion: PRIOR_FEATURE_VERSION,
     priorEpochUnchanged: PRIOR_EPOCH,
-    launches: book.launches.size,
-    flowTxObserved: book.rawObservations || deduped,
+    correctedBoundaryAt: boundary,
+    launches: correctedLaunches.length,
+    preFixExcludedLaunches: [...book.launches.values()].filter((row) => row.featureVersion && !isCorrectedVersion(row.featureVersion)).length,
+    preFixExcludedEvents: preFixEvents.length,
+    flowTxObserved: correctedObservations,
     dedupedTransactions: deduped,
+    sourceMerges: Math.max(0, correctedObservations - deduped),
     w100: windowHealth(100),
     w250: windowHealth(250),
     w500: windowHealth(500),
@@ -809,11 +935,84 @@ function healthFromBook(book) {
     walletHistoryCoverage: rows.filter((row) => row.walletFlow250 && row.walletFlow250.experiencedWalletCount != null).length,
     lateOnlyFlow: late,
     leakageViolations,
+    sourceCoverage,
+    sourceOverlap: correctedEvents.filter((event) => event.sourceCount > 1).length,
+    walletResolvedRate: buys.length ? walletPresent / buys.length : 0,
+    amountResolvedRate: correctedEvents.length ? (correctedEvents.length - unknownAmount) / correctedEvents.length : 0,
+    flowAmountQuality: {
+      events_total: correctedEvents.length,
+      quote_raw_present: quoteRawPresent,
+      quote_amount_resolved: quoteAmountResolved,
+      sol_amount_resolved: solAmountResolved,
+      custom_quote_raw_present: customQuoteRaw,
+      unknown_amount: unknownAmount,
+    },
+    walletResolution: {
+      flow_buys: buys.length,
+      wallet_present: walletPresent,
+      wallet_missing: buys.length - walletPresent,
+      creator_wallet: creatorWallet,
+      deployer_wallet: deployerWallet,
+      non_creator_wallet: nonCreatorWallet,
+    },
   };
+}
+
+function ingestRecord(book, row) {
+  if (!row || typeof row !== "object") return;
+  if (row.type === "wallet_flow_launch") {
+    noteCandidate(book, row);
+    const launch = book.launches.get(launchKey(row.mint));
+    if (!launch) return;
+    if (launch.decisionCutoffAt == null && finite(row.decisionCutoffAt) != null) launch.decisionCutoffAt = row.decisionCutoffAt;
+    if (finite(row.firstObservedAt) != null) {
+      launch.firstObservedAt = Math.min(launch.firstObservedAt || row.firstObservedAt, row.firstObservedAt);
+    }
+    if (row.creator) launch.creator = launch.creator || row.creator;
+    if (row.deployer) launch.deployer = launch.deployer || row.deployer;
+    if (row.quoteMint) launch.quoteMint = launch.quoteMint || row.quoteMint;
+    if (row.mayhem === true) launch.mayhem = true;
+    if (row.sourceCountAtDecision != null) launch.sourceCountAtDecision = row.sourceCountAtDecision;
+    if (row.deployerEvidenceN != null) launch.deployerEvidenceN = row.deployerEvidenceN;
+    if (row.pnl != null) launch.pnl = row.pnl;
+    if (row.mfe != null) launch.mfe = row.mfe;
+    if (row.mae != null) launch.mae = row.mae;
+    if (row.runner10 != null) launch.runner10 = row.runner10;
+    if (row.outcomeObservedAt != null) launch.outcomeObservedAt = row.outcomeObservedAt;
+    return;
+  }
+  if (row.type === "wallet_flow_event" || (row.type === "wallet_flow_source" && row.side)) {
+    observeFlow(book, row);
+    return;
+  }
+  if (row.type === "wallet_flow_source") {
+    book.rawObservations = (book.rawObservations || 0) + 1;
+    if (!row.txSignature) return;
+    for (const event of book.events.values()) {
+      if (event.txSignature === row.txSignature && event.mint === row.mint) {
+        mergeSource(event, row);
+        if (isCorrectedVersion(event.featureVersion)) book.correctedObservations = (book.correctedObservations || 0) + 1;
+        break;
+      }
+    }
+    return;
+  }
+  if (row.type === "wallet_flow_outcome") {
+    const launch = book.launches.get(launchKey(row.mint));
+    if (!launch || !isCorrectedVersion(launch.featureVersion)) return;
+    if (row.decisionCutoffAt != null && launch.decisionCutoffAt != null && row.decisionCutoffAt !== launch.decisionCutoffAt) return;
+    launch.pnl = row.pnl;
+    launch.mfe = row.mfe;
+    launch.mae = row.mae;
+    launch.runner10 = row.runner10;
+    launch.outcomeObservedAt = row.outcomeObservedAt;
+  }
 }
 
 module.exports = {
   FEATURE_VERSION,
+  PRIOR_FEATURE_VERSION,
+  COLLECTOR_FIX_VERSION,
   RESEARCH_EPOCH,
   PRIOR_EPOCH,
   SOL_MINT,
@@ -841,5 +1040,6 @@ module.exports = {
   evaluateBook,
   strictPass,
   healthFromBook,
+  ingestRecord,
   amountForLaunch,
 };

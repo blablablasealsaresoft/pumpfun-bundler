@@ -337,15 +337,22 @@ export function logDecisionTrace(t: DecisionTrace) {
   Object.assign(t, stamped);
   sessionDecisionTraces.push(t);
   appendJsonl(DECISION_TRACE_PATH, t);
+  let v3Snapshot: { sourceCountAtDecision?: number } | null = null;
   try {
-    // Research telemetry only. Must not change buy, fee, exit, or kill.
-    require("./research/v3-collector.js").observeDecision(t);
+    // Research telemetry only. The snapshot must not change buy, fee, exit, or kill.
+    v3Snapshot = require("./research/v3-collector.js").observeDecision(t);
   } catch (err) {
     console.warn("[V3] decision stamp failed", (err as Error).message);
   }
   try {
-    // Research telemetry only. Does not move the live cutoff or submit a trade.
-    require("./research/wallet-flow-collector.js").noteDecision(t);
+    // Separate telemetry object. Do not write sourceCount back onto the economic trace.
+    require("./research/wallet-flow-collector.js").noteDecision({
+      ...t,
+      sourceCountAtDecision:
+        v3Snapshot && typeof v3Snapshot.sourceCountAtDecision === "number"
+          ? v3Snapshot.sourceCountAtDecision
+          : null,
+    });
   } catch (err) {
     console.warn("[wallet-flow] research warning", (err as Error).message);
   }
