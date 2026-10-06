@@ -356,6 +356,18 @@ export function logDecisionTrace(t: DecisionTrace) {
   } catch (err) {
     console.warn("[wallet-flow] research warning", (err as Error).message);
   }
+  try {
+    require("./research/timing-frontier-collector.js").noteCutoff({
+      mint: t.mint,
+      decisionCutoffAt: t.ts,
+      creator: t.creator,
+      deployer: t.deployer,
+      createSig: t.createSig,
+      mayhem: t.mayhem === true,
+    });
+  } catch (err) {
+    console.warn("[timing] research warning", (err as Error).message);
+  }
   if (t.decision === "skip") {
     console.log(
       `[decision] SKIP ${t.mint.slice(0, 8)}… reason=${t.skipReason} score=${
