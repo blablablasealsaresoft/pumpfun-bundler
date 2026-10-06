@@ -165,6 +165,7 @@ function observeDecision(trace) {
       type: "v3_outcome",
       mint: trace.mint,
       researchEpoch: V3_EPOCH,
+      createSignature: (rec.decision && rec.decision.createSignature) || rec.meta.createSignature || null,
       decisionCutoffAt: rec.decision ? rec.decision.decisionCutoffAt : null,
       pnl: typeof trace.ret30s === "number" ? trace.ret30s : null,
       mfe: typeof trace.mfe30s === "number" ? trace.mfe30s : null,

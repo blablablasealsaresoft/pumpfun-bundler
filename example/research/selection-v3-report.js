@@ -9,6 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const { defaultPaths } = require("./records");
 const { loadShadowRows } = require("./selection-v2-report");
+const { loadV3CollectorRows } = require("./v3-collector-loader");
 const v2 = require("./selection-v2");
 const v3 = require("./selection-v3");
 
@@ -85,28 +86,74 @@ function formatV3Report(rep, baseline) {
     );
   }
   lines.push("");
-  lines.push("V3 OPPORTUNITY MODEL");
-  lines.push("V3_STATUS = " + rep.opportunity.status);
-  if (rep.collector) {
+  const collector = rep.collector || {};
+  lines.push("V3 COLLECTOR");
+  lines.push("decisions: " + (collector.rawDecisions != null ? collector.rawDecisions : 0));
+  lines.push("outcomes: " + (collector.outcomes != null ? collector.outcomes : 0));
+  lines.push("joined valid: " + (collector.joinedValid != null ? collector.joinedValid : rep.opportunity.v3Rows || 0));
+  lines.push("wallet flow decision-eligible: " + (collector.walletFlowEligible != null ? collector.walletFlowEligible : rep.opportunity.decisionTimeFlowRows || 0));
+  lines.push("wallet flow + outcome effective: " + (collector.walletFlowOutcomeEffective != null ? collector.walletFlowOutcomeEffective : rep.opportunity.effectiveN || 0));
+  lines.push("curve decision-eligible: " + (collector.curveEligible != null ? collector.curveEligible : 0));
+  lines.push("leakage excluded: " + (collector.leakageExcluded != null ? collector.leakageExcluded : rep.opportunity.leakageExcluded || 0));
+  lines.push("source overlap: " + (collector.sourceOverlap != null ? collector.sourceOverlap : 0));
+  lines.push("high-confidence labels: " + (collector.highConfidenceLabels != null ? collector.highConfidenceLabels : rep.opportunity.highConfidenceN || 0));
+  lines.push("multi-source labels: " + (collector.multiSourceLabels != null ? collector.multiSourceLabels : 0));
+  lines.push("high-confidence means collector confidence >= 0.6 and not the single_source stamp. It is not a cross-venue validation.");
+  if (collector.exclusions) {
+    const ex = collector.exclusions;
     lines.push(
-      "  collector file observations=" +
-        rep.collector.observations +
-        " labels=" +
-        rep.collector.labels +
-        " (new epoch only; historical rows were not relabeled)"
+      "exclusions missing_pnl=" +
+        ex.missing_pnl +
+        " missing_mfe=" +
+        ex.missing_mfe +
+        " missing_mae=" +
+        ex.missing_mae +
+        " missing_wallet_flow=" +
+        ex.missing_wallet_flow +
+        " leakage=" +
+        ex.leakage +
+        " duplicate=" +
+        ex.duplicate
     );
   }
-  lines.push(rep.opportunity.researchVerdict);
-  lines.push(
-    "  v3 rows=" +
-      rep.opportunity.v3Rows +
-      " decision-time wallet-flow rows=" +
-      rep.opportunity.decisionTimeFlowRows +
-      " required=" +
-      rep.opportunity.required
-  );
+  lines.push("");
+  lines.push("V3 OPPORTUNITY MODEL");
+  lines.push("status:");
+  lines.push(rep.opportunity.status);
+  lines.push("V3_STATUS = " + rep.opportunity.status);
+  lines.push("effective new-epoch n: " + rep.opportunity.effectiveN);
+  lines.push("walk-forward eligible: " + (rep.opportunity.walkForwardEligible ? "yes" : "no"));
+  lines.push("opportunity_scored: " + rep.opportunity.opportunityScored);
+  lines.push("opportunity_abstain: " + rep.opportunity.opportunityAbstain);
   lines.push("  " + rep.opportunity.reason);
-  lines.push("  rho pnl / mfe / kendall: not computed — new-epoch features are absent");
+  if (rep.opportunity.folds && rep.opportunity.folds.length) {
+    lines.push("  all valid labels vs high-confidence labels (high-confidence is outcomeConfidence>=0.6 and not single_source):");
+    for (const f of rep.opportunity.folds) {
+      lines.push(
+        "  " +
+          f.name +
+          " all-labels n=" +
+          f.n +
+          " rho pnl " +
+          fmt(f.rhoPnl) +
+          " rho mfe " +
+          fmt(f.rhoMfe) +
+          " | high-confidence n=" +
+          f.highN +
+          " rho pnl " +
+          fmt(f.rhoPnlHighConfidence)
+      );
+    }
+    lines.push("  walk-forward is descriptive. It is not PASS_OPPORTUNITY_RESEARCH.");
+    if (!rep.opportunity.opportunityScored) {
+      lines.push("  walk-forward fit produced no scores. Constant or missing opportunity features abstain.");
+    }
+  } else {
+    lines.push("  rho pnl / mfe / kendall: not computed — effective new-epoch n is below the walk-forward gate");
+  }
+  if (rep.opportunity.passGate && rep.opportunity.passGate.reason === "MISSING_MAE_EVIDENCE") {
+    lines.push("  pass gate: FAIL_OPPORTUNITY_RESEARCH MISSING_MAE_EVIDENCE");
+  }
   lines.push("");
   lines.push("SUBGROUPS (latest risk-fold scores; small n is not interpreted)");
   for (const [name, g] of Object.entries(rep.subgroups)) {
@@ -126,7 +173,13 @@ function formatV3Report(rep, baseline) {
 function main() {
   const paths = defaultPaths();
   const loaded = loadShadowRows(paths.decisionPath);
-  const rep = v3.evaluateProgram(loaded.rows);
+  const v3Path = path.join(path.dirname(paths.decisionPath), "v3-decisions.jsonl");
+  const collector = loadV3CollectorRows(v3Path);
+  const rep = v3.evaluateProgram({
+    riskRows: loaded.rows,
+    opportunityRows: collector.joined,
+  });
+  rep.collector = collector.summary;
   let baseline = null;
   try {
     const ex = loaded.rows.filter(v2.isExStale);
@@ -139,17 +192,6 @@ function main() {
   } catch (err) {
     baseline = null;
   }
-  const v3Path = path.join(path.dirname(paths.decisionPath), "v3-decisions.jsonl");
-  let collector = { observations: 0, labels: 0 };
-  if (fs.existsSync(v3Path)) {
-    const { loadJsonl } = require("./records");
-    const v3Rows = loadJsonl(v3Path);
-    collector = {
-      observations: v3Rows.filter((r) => r.type === "v3_decision").length,
-      labels: v3Rows.filter((r) => r.type === "v3_outcome").length,
-    };
-  }
-  rep.collector = collector;
   const text = formatV3Report(rep, baseline);
   fs.mkdirSync(paths.reportDir, { recursive: true });
   const out = path.join(paths.reportDir, "selection-v3.json");
@@ -160,6 +202,7 @@ function main() {
         generatedAt: new Date().toISOString(),
         risk: rep.risk,
         opportunity: rep.opportunity,
+        collector: rep.collector,
         folds: rep.folds,
         ablation: rep.ablation,
         subgroups: rep.subgroups,

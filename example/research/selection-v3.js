@@ -15,6 +15,7 @@
 const { mean, spearman, mulberry32 } = require("./math");
 const v2 = require("./selection-v2");
 const { isMayhemRegime } = require("./observation/canonical");
+const { isEffectiveOpportunityRow, isHighConfidenceLabel } = require("./v3-collector-loader");
 
 const V3_MODEL = "selection-v3-shadow";
 const V3_EPOCH = "selection_v3_shadow_2026_10";
@@ -272,20 +273,88 @@ function hasDecisionWalletFlow(row) {
   return !!(flow && typeof flow.uniqueBuyers === "number");
 }
 
-function opportunityStatus(rows) {
-  const epochRows = v3Rows(rows);
-  const usable = epochRows.filter(hasDecisionWalletFlow);
+function judgeOpportunityPass(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const ranked = list.filter((r) => !r.excludedForLeakage && hasDecisionWalletFlow(r) && typeof r.pnl === "number");
+  const missingMae = ranked.filter((r) => typeof r.mae !== "number" || typeof r.mfe !== "number");
+  const complete = ranked.filter((r) => typeof r.mae === "number" && typeof r.mfe === "number");
+  if (ranked.length >= OPPORTUNITY_MIN_N && missingMae.length && complete.length < OPPORTUNITY_MIN_N) {
+    return {
+      researchVerdict: "FAIL_OPPORTUNITY_RESEARCH",
+      reason: "MISSING_MAE_EVIDENCE",
+      pass: false,
+    };
+  }
+  if (complete.length >= OPPORTUNITY_MIN_N) {
+    return {
+      researchVerdict: "HOLD_FOR_WALK_FORWARD",
+      reason: "walk-forward can run; PASS_OPPORTUNITY_RESEARCH is not automatic",
+      pass: false,
+    };
+  }
   return {
-    status: "COLLECT_NEW_EPOCH",
-    researchVerdict: usable.length >= OPPORTUNITY_MIN_N ? "HOLD_FOR_WALK_FORWARD" : "COLLECT_NEW_EPOCH",
-    v3Rows: epochRows.length,
-    decisionTimeFlowRows: usable.length,
-    required: OPPORTUNITY_MIN_N,
-    reason:
-      usable.length >= OPPORTUNITY_MIN_N
-        ? "enough rows to start a walk-forward; this build still requires an explicit fit on prior folds before any pass"
-        : "new-epoch decision-time wallet flow, curve, and source fields are not in the historical traces",
+    researchVerdict: "COLLECT_NEW_EPOCH",
+    reason: "effective new-epoch rows with decision-time wallet flow, complete outcomes, and no leakage are below " + OPPORTUNITY_MIN_N,
+    pass: false,
   };
+}
+
+function evaluateOpportunity(rows) {
+  const sorted = [...(rows || [])].sort(
+    (a, b) => (a.decisionCutoffAt || a.ts || 0) - (b.decisionCutoffAt || b.ts || 0) || String(a.id).localeCompare(String(b.id))
+  );
+  const effective = sorted.filter(isEffectiveOpportunityRow);
+  const passGate = judgeOpportunityPass(sorted);
+  const ready = effective.length >= OPPORTUNITY_MIN_N;
+  const folds = [];
+  let opportunityScored = 0;
+  let opportunityAbstain = 0;
+  if (ready) {
+    const timed = effective.map((r) => ({ ...r, ts: r.decisionCutoffAt }));
+    for (const fold of walkForwardFolds(timed)) {
+      assertFoldIsolation(fold);
+      const model = fitOpportunity(fold.train);
+      const testScored = fold.test.map((r) => {
+        const s = model.score(r);
+        return { ...r, opportunityScore: s.opportunityScore, abstainReason: s.abstainReason };
+      });
+      const usable = testScored.filter((r) => typeof r.opportunityScore === "number" && typeof r.pnl === "number");
+      const high = usable.filter(isHighConfidenceLabel);
+      opportunityScored += usable.length;
+      opportunityAbstain += testScored.length - usable.length;
+      folds.push({
+        name: fold.name,
+        n: usable.length,
+        highN: high.length,
+        rhoPnl: spearman(usable.map((r) => r.opportunityScore), usable.map((r) => r.pnl)).rho,
+        rhoMfe: spearman(usable.map((r) => r.opportunityScore), usable.map((r) => r.mfe)).rho,
+        rhoPnlHighConfidence: spearman(high.map((r) => r.opportunityScore), high.map((r) => r.pnl)).rho,
+      });
+    }
+  }
+  const status = ready ? "HOLD_FOR_WALK_FORWARD" : "COLLECT_NEW_EPOCH";
+  return {
+    status,
+    researchVerdict: status,
+    passGate,
+    v3Rows: sorted.length,
+    decisionTimeFlowRows: sorted.filter((r) => !r.excludedForLeakage && hasDecisionWalletFlow(r)).length,
+    effectiveN: effective.length,
+    required: OPPORTUNITY_MIN_N,
+    walkForwardEligible: ready,
+    folds,
+    opportunityScored: ready ? opportunityScored : 0,
+    opportunityAbstain: ready ? opportunityAbstain : sorted.length,
+    highConfidenceN: effective.filter(isHighConfidenceLabel).length,
+    leakageExcluded: sorted.filter((r) => r.excludedForLeakage).length,
+    reason: ready
+      ? "effective new-epoch sample meets the walk-forward gate; this is not PASS_OPPORTUNITY_RESEARCH"
+      : "effective joined rows with decision-time wallet flow, pnl, mfe, mae, and no leakage are below " + OPPORTUNITY_MIN_N,
+  };
+}
+
+function opportunityStatus(rows) {
+  return evaluateOpportunity(v3Rows(rows));
 }
 
 function fitOpportunity(train) {
@@ -395,7 +464,9 @@ function subgroupSlice(scored, pred) {
   };
 }
 
-function evaluateProgram(rows) {
+function evaluateProgram(input) {
+  const rows = Array.isArray(input) ? input : (input && input.riskRows) || [];
+  const opportunityRows = Array.isArray(input) ? [] : (input && input.opportunityRows) || [];
   const ex = rows.filter(v2.isExStale);
   const foldsIn = walkForwardFolds(ex);
   const folds = [];
@@ -421,7 +492,10 @@ function evaluateProgram(rows) {
   const last = foldsIn[foldsIn.length - 1];
   const ab = last ? ablation(last.train, last.test) : { full: null, rows: [] };
   const risk = judgeRisk(folds);
-  const opportunity = opportunityStatus(rows);
+  const opportunity = evaluateOpportunity(opportunityRows);
+  if (opportunity.researchVerdict === "PASS_OPPORTUNITY_RESEARCH" || opportunity.passGate.pass === true) {
+    throw new Error("opportunity evaluation tried to emit a research pass");
+  }
   const lastScored = folds.length ? folds[folds.length - 1].scored : [];
   const subgroups = {
     exStale: { n: ex.length, status: ex.length >= SUBGROUP_MIN_N ? "ok" : "insufficient" },
@@ -482,6 +556,8 @@ module.exports = {
   ablation,
   judgeRisk,
   opportunityStatus,
+  evaluateOpportunity,
+  judgeOpportunityPass,
   fitOpportunity,
   selectionV3,
   pairedRow,

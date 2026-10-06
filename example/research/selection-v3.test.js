@@ -16,6 +16,8 @@ const adapters = require("./valuation/adapters");
 const fees = require("./valuation/fees");
 const rpc = require("./rpc-budget");
 const { formatV3Report } = require("./selection-v3-report");
+const { joinV3CollectorRows } = require("./v3-collector-loader");
+const { filterEffective } = require("./effective-n");
 const { bootstrapMedianDiff } = require("./math");
 
 let passed = 0;
@@ -569,6 +571,280 @@ test("report cannot emit live recommendation", () => {
   assert.throws(() =>
     formatV3Report({ ...rep, shadowCanPromoteLive: true, liveStatus: "UNCHANGED" }, null)
   );
+});
+
+function v3Decision(partial) {
+  const row = {
+    type: "v3_decision",
+    researchEpoch: "selection_v3_shadow_2026_10",
+    mint: "MintA",
+    createSignature: "SigA",
+    decisionCutoffAt: 1_000,
+    leakageViolations: 0,
+    sourceTags: ["helius_preprocessed"],
+    sourceCountAtDecision: 1,
+    sourceAgreementAtDecision: true,
+    quoteMint: "So11111111111111111111111111111111111111112",
+    quoteAssetClass: "SOL",
+    isCustomPair: false,
+    mayhem: false,
+    creatorSol: 1,
+    creatorBuySol: 0.4,
+    deployerRawQuality: 40,
+    deployerEvidenceN: 2,
+    deployerConfidence: 0.2,
+    walletFlow: {
+      uniqueBuyers: 2,
+      buyCount: 2,
+      buySol: 0.8,
+      decisionEligible: true,
+      lastIncludedObservedAt: 1_000,
+      windowMs: 250,
+    },
+    ...partial,
+  };
+  if (!partial || !Object.prototype.hasOwnProperty.call(partial, "walletFlow")) {
+    row.walletFlow = { ...row.walletFlow, lastIncludedObservedAt: row.decisionCutoffAt };
+  }
+  return row;
+}
+
+function v3Outcome(partial) {
+  return {
+    type: "v3_outcome",
+    researchEpoch: "selection_v3_shadow_2026_10",
+    mint: "MintA",
+    decisionCutoffAt: 1_000,
+    pnl: -1.5,
+    mfe: 4,
+    mae: -3,
+    runner10: false,
+    valuationSource: "pump_curve",
+    confidence: 0.6,
+    ...partial,
+  };
+}
+
+test("V3 decision and outcome join on mint cutoff when signature is absent", () => {
+  const joined = joinV3CollectorRows([
+    v3Decision(),
+    v3Outcome(),
+    { type: "v3_source_late", mint: "MintA", source: "helius_processed", observedAt: 5_000, decisionCutoffAt: 1_000, afterDecision: true },
+  ]);
+  assert.strictEqual(joined.joined.length, 1);
+  assert.strictEqual(joined.joined[0].joinKey, "mint+decisionCutoffAt");
+  assert.strictEqual(joined.joined[0].pnl, -1.5);
+  assert.strictEqual(joined.joined[0].walletFlowDecision.uniqueBuyers, 2);
+  assert.deepStrictEqual(joined.joined[0].sourceTags, ["helius_preprocessed"]);
+  assert.strictEqual(joined.summary.lateSources, 1);
+});
+
+test("identity collision is not joined by mint alone", () => {
+  const rows = joinV3CollectorRows([
+    v3Decision({ createSignature: "SigA" }),
+    v3Decision({ createSignature: "SigB" }),
+    v3Outcome(),
+  ]);
+  assert.strictEqual(rows.joined.length, 0);
+  assert.ok(rows.summary.exclusions.ambiguous_identity >= 1);
+  const signed = joinV3CollectorRows([
+    v3Decision({ createSignature: "SigA" }),
+    v3Decision({ createSignature: "SigB" }),
+    v3Outcome({ createSignature: "SigB", pnl: -7 }),
+  ]);
+  assert.strictEqual(signed.joined.length, 1);
+  assert.strictEqual(signed.joined[0].createSignature, "SigB");
+  assert.strictEqual(signed.joined[0].pnl, -7);
+  assert.strictEqual(signed.joined[0].joinKey, "mint+createSignature+decisionCutoffAt");
+});
+
+test("walletFlow maps to walletFlowDecision only when decision-eligible", () => {
+  const ok = joinV3CollectorRows([v3Decision(), v3Outcome()]);
+  assert.ok(ok.joined[0].walletFlowDecision);
+  assert.strictEqual(ok.joined[0].walletFlowDecision.decisionEligible, true);
+  const lateFlow = joinV3CollectorRows([
+    v3Decision({
+      walletFlow: { uniqueBuyers: 4, decisionEligible: true, lastIncludedObservedAt: 2_000 },
+    }),
+    v3Outcome(),
+  ]);
+  assert.strictEqual(lateFlow.joined[0].walletFlowDecision, null);
+  assert.strictEqual(lateFlow.joined[0].excludedForLeakage, true);
+  const ineligible = joinV3CollectorRows([
+    v3Decision({
+      walletFlow: { uniqueBuyers: 4, decisionEligible: false, lastIncludedObservedAt: 2_000 },
+    }),
+    v3Outcome(),
+  ]);
+  assert.strictEqual(ineligible.joined[0].walletFlowDecision, null);
+  assert.strictEqual(ineligible.joined[0].excludedForLeakage, false);
+  assert.strictEqual(ineligible.effective.length, 0);
+});
+
+test("after-cutoff curve is excluded and decision-eligible curve is kept", () => {
+  const late = joinV3CollectorRows([
+    v3Decision(),
+    v3Outcome(),
+    { type: "v3_curve", mint: "MintA", observedAt: 4_000, decisionEligible: false, curveProgress: 0.2 },
+  ]);
+  assert.strictEqual(late.joined[0].curveDecision, null);
+  const markedLate = joinV3CollectorRows([
+    v3Decision(),
+    v3Outcome(),
+    { type: "v3_curve", mint: "MintA", observedAt: 4_000, decisionEligible: true, curveProgress: 0.9 },
+  ]);
+  assert.strictEqual(markedLate.joined[0].curveDecision, null);
+  assert.strictEqual(markedLate.joined[0].excludedForLeakage, true);
+  const kept = joinV3CollectorRows([
+    v3Decision(),
+    v3Outcome(),
+    { type: "v3_curve", mint: "MintA", observedAt: 900, decisionEligible: true, curveProgress: 0.1 },
+  ]);
+  assert.strictEqual(kept.joined[0].curveDecision.curveProgress, 0.1);
+  assert.strictEqual(kept.summary.curveEligible, 1);
+});
+
+test("leakage and missing outcomes are excluded", () => {
+  const leaked = joinV3CollectorRows([
+    v3Decision({ leakageViolations: 2 }),
+    v3Outcome(),
+  ]);
+  assert.strictEqual(leaked.effective.length, 0);
+  assert.strictEqual(leaked.summary.leakageExcluded, 1);
+  assert.strictEqual(leaked.joined[0].excludedForLeakage, true);
+  const missing = joinV3CollectorRows([v3Decision()]);
+  assert.strictEqual(missing.joined.length, 0);
+  assert.strictEqual(missing.summary.exclusions.missing_outcome, 1);
+});
+
+test("missing MAE fails the opportunity pass gate", () => {
+  const rows = [];
+  for (let i = 0; i < 100; i++) {
+    rows.push({
+      id: "m" + i,
+      researchEpoch: "selection_v3_shadow_2026_10",
+      decisionCutoffAt: 10_000 + i,
+      pnl: -1,
+      mfe: null,
+      mae: null,
+      excludedForLeakage: false,
+      walletFlowDecision: { uniqueBuyers: 1, decisionEligible: true, lastIncludedObservedAt: 10_000 + i },
+    });
+  }
+  const gate = v3.judgeOpportunityPass(rows);
+  assert.strictEqual(gate.researchVerdict, "FAIL_OPPORTUNITY_RESEARCH");
+  assert.strictEqual(gate.reason, "MISSING_MAE_EVIDENCE");
+  assert.strictEqual(gate.pass, false);
+  const rep = v3.evaluateProgram({ riskRows: [], opportunityRows: rows });
+  assert.notStrictEqual(rep.opportunity.researchVerdict, "PASS_OPPORTUNITY_RESEARCH");
+  assert.strictEqual(rep.opportunity.status, "COLLECT_NEW_EPOCH");
+});
+
+test("duplicate outcomes are deduped deterministically", () => {
+  const first = v3Outcome({ pnl: -1, mfe: 2, mae: -2 });
+  const second = v3Outcome({ pnl: -9, mfe: 2, mae: -2 });
+  const a = joinV3CollectorRows([v3Decision(), first, second]);
+  const b = joinV3CollectorRows([v3Decision(), second, first]);
+  assert.strictEqual(a.summary.exclusions.duplicate, 1);
+  assert.strictEqual(a.joined.length, 1);
+  assert.strictEqual(a.joined[0].pnl, b.joined[0].pnl);
+});
+
+test("collector rows are ordered by decisionCutoffAt and do not enter live_selected", () => {
+  const joined = joinV3CollectorRows([
+    v3Decision({ mint: "M2", createSignature: "S2", decisionCutoffAt: 3_000 }),
+    v3Outcome({ mint: "M2", decisionCutoffAt: 3_000, pnl: -2 }),
+    v3Decision({ mint: "M1", createSignature: "S1", decisionCutoffAt: 1_000 }),
+    v3Outcome({ mint: "M1", decisionCutoffAt: 1_000, pnl: -1 }),
+    v3Decision({ mint: "M3", createSignature: "S3", decisionCutoffAt: 2_000 }),
+    v3Outcome({ mint: "M3", decisionCutoffAt: 2_000, pnl: -3 }),
+  ]);
+  assert.deepStrictEqual(joined.joined.map((r) => r.decisionCutoffAt), [1_000, 2_000, 3_000]);
+  const live = filterEffective(
+    joined.joined.map((r) => ({
+      candidateId: r.id,
+      mint: r.mint,
+      researchEpoch: "post_fix_v1",
+      selected: r.selected,
+      sampleKind: r.sampleKind,
+      convictionScore: 1,
+      outcome: { status: "complete", complete: true, realizedPnl: r.pnl },
+    })),
+    { universe: "live_selected" }
+  );
+  assert.strictEqual(live.effective_n, 0);
+  const folds = v3.walkForwardFolds(joined.effective.map((r) => ({ ...r, ts: r.decisionCutoffAt })));
+  if (folds.length) {
+    const maxTrain = Math.max(...folds[0].train.map((r) => r.ts));
+    const minTest = Math.min(...folds[0].test.map((r) => r.ts));
+    assert.ok(minTest >= maxTrain);
+  }
+});
+
+test("opportunity evaluator uses collector rows and leaves historical risk unchanged", () => {
+  const historical = [];
+  for (let i = 0; i < 16; i++) {
+    historical.push({
+      id: "s" + i,
+      ts: i * 1000,
+      pnl: i % 3 === 0 ? -25 : -1,
+      mae: -4,
+      mfe: 1,
+      oldScore: 50,
+      deployerN: i % 2 === 0 ? 0 : 3,
+      rawScore: 20 + i,
+      launches1h: 1,
+      creatorBuySol: 0.4,
+      creatorSol: 1,
+      mayhem: false,
+      skipCohort: "other_skip",
+      researchEpoch: "post_fix_v1",
+    });
+  }
+  const collector = joinV3CollectorRows([
+    v3Decision({ mint: "MintZ", createSignature: "SigZ", decisionCutoffAt: 50 }),
+    v3Outcome({ mint: "MintZ", decisionCutoffAt: 50 }),
+  ]);
+  const riskOnly = v3.evaluateProgram(historical);
+  const split = v3.evaluateProgram({ riskRows: historical, opportunityRows: collector.joined });
+  assert.strictEqual(split.risk.researchVerdict, riskOnly.risk.researchVerdict);
+  assert.strictEqual(split.folds.length, riskOnly.folds.length);
+  assert.strictEqual(split.opportunity.effectiveN, 1);
+  assert.strictEqual(riskOnly.opportunity.effectiveN, 0);
+  assert.strictEqual(split.opportunity.status, "COLLECT_NEW_EPOCH");
+  assert.strictEqual(split.liveStatus, "UNCHANGED");
+  assert.strictEqual(split.shadowCanPromoteLive, false);
+  const text = formatV3Report({ ...split, collector: collector.summary }, null);
+  assert.ok(text.includes("decisions: 1"));
+  assert.ok(text.includes("V3_STATUS = COLLECT_NEW_EPOCH"));
+  assert.ok(!text.includes("v3 rows="));
+  assert.ok(!v3.FORBIDDEN_LIVE_TEXT.test(text));
+  const loaderSrc = fs.readFileSync(path.join(__dirname, "v3-collector-loader.js"), "utf8");
+  assert.ok(!/sendTransaction\s*\(/.test(loaderSrc));
+  const ready = [];
+  for (let i = 0; i < 100; i++) {
+    ready.push({
+      id: "e" + i,
+      researchEpoch: "selection_v3_shadow_2026_10",
+      decisionCutoffAt: 100_000 + i,
+      ts: 100_000 + i,
+      pnl: (i % 7) - 3,
+      mfe: i % 5,
+      mae: -1 - (i % 4),
+      mayhem: false,
+      excludedForLeakage: false,
+      valuationSource: i % 2 === 0 ? "pump_curve" : "single_source",
+      outcomeConfidence: i % 2 === 0 ? 0.6 : 0.4,
+      walletFlowDecision: { uniqueBuyers: 1 + (i % 3), decisionEligible: true, lastIncludedObservedAt: 100_000 + i },
+    });
+  }
+  const held = v3.evaluateProgram({ riskRows: historical, opportunityRows: ready });
+  assert.strictEqual(held.opportunity.status, "HOLD_FOR_WALK_FORWARD");
+  assert.strictEqual(held.opportunity.walkForwardEligible, true);
+  assert.notStrictEqual(held.opportunity.researchVerdict, "PASS_OPPORTUNITY_RESEARCH");
+  assert.strictEqual(held.risk.researchVerdict, riskOnly.risk.researchVerdict);
+  assert.ok(held.opportunity.folds.length > 0);
+  assert.ok(held.opportunity.folds[0].test ? true : held.opportunity.folds[0].n >= 0);
 });
 
 console.log("");
