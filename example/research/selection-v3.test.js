@@ -473,6 +473,73 @@ test("subgroup min-n behavior", () => {
   assert.strictEqual(enough.status, "ok");
 });
 
+test("V3 collector is telemetry and keeps the cutoff immutable", () => {
+  const os = require("os");
+  const v3c = require("./v3-collector");
+  const file = path.join(os.tmpdir(), "v3-test-" + process.pid + ".jsonl");
+  v3c.resetForTests();
+  v3c.setTracePath(file);
+  v3c.noteSource({
+    mint: "MintA",
+    source: "preprocessed",
+    observedAt: 1_000,
+    slot: 10,
+    creator: "CreatorA",
+    quoteMint: "So11111111111111111111111111111111111111112",
+    createVersion: "legacy",
+  });
+  const snap = v3c.observeDecision({
+    mint: "MintA",
+    ts: 1_100,
+    source: "preprocessed",
+    creator: "CreatorA",
+    deployer: "DeployerA",
+    decision: "skip",
+    skipReason: "shadow_observe_only",
+    rawScore: 40,
+    deployerN: 0,
+    mayhem: false,
+    createSlot: 10,
+  });
+  assert.strictEqual(snap.decisionCutoffAt, 1_100);
+  assert.strictEqual(snap.opportunityScore, null);
+  assert.strictEqual(snap.abstainReason, "insufficient_v3_features");
+  assert.strictEqual(snap.maySubmit, false);
+  assert.strictEqual(snap.researchEpoch, "selection_v3_shadow_2026_10");
+  const late = v3c.noteSource({
+    mint: "MintA",
+    source: "txsub",
+    observedAt: 2_000,
+    slot: 11,
+    creator: "CreatorA",
+  });
+  assert.strictEqual(late.afterDecision, true);
+  assert.strictEqual(late.decisionCutoffAt, 1_100);
+  const again = v3c.observeDecision({ mint: "MintA", ts: 3_000, decision: "skip", skipReason: "other" });
+  assert.strictEqual(again.decisionCutoffAt, 1_100);
+  const src = fs.readFileSync(path.join(__dirname, "v3-collector.js"), "utf8");
+  assert.ok(!/sendTransaction\s*\(/.test(src));
+  assert.strictEqual(v3c.executionSurface().maySubmit, false);
+  v3c.resetForTests();
+});
+
+test("listener research hook cannot reach the buy path", () => {
+  const listener = fs.readFileSync(path.join(__dirname, "..", "snipe-listener.ts"), "utf8");
+  const infra = fs.readFileSync(path.join(__dirname, "..", "snipe-infra.ts"), "utf8");
+  assert.ok(listener.includes('require("./research/v3-collector.js").noteSource'));
+  assert.ok(infra.includes('require("./research/v3-collector.js").observeDecision'));
+  const buyAt = listener.indexOf("async function buyMint");
+  const handleAt = listener.indexOf("async function handleCreate");
+  assert.ok(buyAt > 0 && handleAt > buyAt);
+  const buyFn = listener.slice(buyAt, handleAt);
+  assert.ok(!buyFn.includes("v3-collector"));
+  assert.ok(!buyFn.includes("opportunityScore"));
+  assert.ok(!buyFn.includes("riskScore"));
+  const killAt = listener.indexOf("expectancyKillSwitch()");
+  const killWindow = listener.slice(killAt, killAt + 400);
+  assert.ok(!killWindow.includes("v3-collector"));
+});
+
 test("report cannot emit live recommendation", () => {
   const rows = [];
   for (let i = 0; i < 16; i++) {

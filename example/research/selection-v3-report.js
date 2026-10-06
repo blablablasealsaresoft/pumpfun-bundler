@@ -87,6 +87,15 @@ function formatV3Report(rep, baseline) {
   lines.push("");
   lines.push("V3 OPPORTUNITY MODEL");
   lines.push("V3_STATUS = " + rep.opportunity.status);
+  if (rep.collector) {
+    lines.push(
+      "  collector file observations=" +
+        rep.collector.observations +
+        " labels=" +
+        rep.collector.labels +
+        " (new epoch only; historical rows were not relabeled)"
+    );
+  }
   lines.push(rep.opportunity.researchVerdict);
   lines.push(
     "  v3 rows=" +
@@ -130,6 +139,17 @@ function main() {
   } catch (err) {
     baseline = null;
   }
+  const v3Path = path.join(path.dirname(paths.decisionPath), "v3-decisions.jsonl");
+  let collector = { observations: 0, labels: 0 };
+  if (fs.existsSync(v3Path)) {
+    const { loadJsonl } = require("./records");
+    const v3Rows = loadJsonl(v3Path);
+    collector = {
+      observations: v3Rows.filter((r) => r.type === "v3_decision").length,
+      labels: v3Rows.filter((r) => r.type === "v3_outcome").length,
+    };
+  }
+  rep.collector = collector;
   const text = formatV3Report(rep, baseline);
   fs.mkdirSync(paths.reportDir, { recursive: true });
   const out = path.join(paths.reportDir, "selection-v3.json");

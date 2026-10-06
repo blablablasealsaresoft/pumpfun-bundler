@@ -337,6 +337,12 @@ export function logDecisionTrace(t: DecisionTrace) {
   Object.assign(t, stamped);
   sessionDecisionTraces.push(t);
   appendJsonl(DECISION_TRACE_PATH, t);
+  try {
+    // Research telemetry only. Must not change buy, fee, exit, or kill.
+    require("./research/v3-collector.js").observeDecision(t);
+  } catch (err) {
+    console.warn("[V3] decision stamp failed", (err as Error).message);
+  }
   if (t.decision === "skip") {
     console.log(
       `[decision] SKIP ${t.mint.slice(0, 8)}… reason=${t.skipReason} score=${
