@@ -439,15 +439,40 @@ function temporalSplit(rows, fractions = {}) {
   };
 }
 
-function attachCausalContext(rows) {
+function indexCreateStream(events) {
+  const byMint = new Map();
+  for (const e of events || []) {
+    if (!e) continue;
+    const mint = e.mint || e.id;
+    if (!mint || typeof e.ts !== "number") continue;
+    const prev = byMint.get(mint);
+    if (!prev || e.ts < prev.ts) byMint.set(mint, { mint, ts: e.ts });
+  }
+  return [...byMint.values()].sort((a, b) => a.ts - b.ts || String(a.mint).localeCompare(String(b.mint)));
+}
+
+/** Count creates strictly before ts, inside the prior 60s, from a full decision stream. */
+function createsPrior60sAt(sortedStream, ts) {
+  let n = 0;
+  for (let i = sortedStream.length - 1; i >= 0; i--) {
+    const pts = sortedStream[i].ts;
+    if (pts >= ts) continue;
+    if (pts < ts - 60_000) break;
+    n++;
+  }
+  return n;
+}
+
+function attachCausalContext(rows, createStream) {
+  const stream = indexCreateStream(
+    createStream || rows.map((r) => ({ mint: r.mint || r.id, ts: r.ts }))
+  );
   const sorted = [...rows].sort(
     (a, b) => (a.ts || 0) - (b.ts || 0) || String(a.id).localeCompare(String(b.id))
   );
-  let wStart = 0;
   for (let j = 0; j < sorted.length; j++) {
     const t = sorted[j].ts || 0;
-    while (wStart < j && (sorted[wStart].ts || 0) < t - 60_000) wStart++;
-    const createsPrior60s = j - wStart;
+    const createsPrior60s = createsPrior60sAt(stream, t);
     sorted[j].createsPrior60s = createsPrior60s;
     sorted[j].regime = classifyRegime(createsPrior60s);
     const knowBefore = t - OUTCOME_KNOWABLE_AFTER_MS;
@@ -748,13 +773,9 @@ function researchGate(ev) {
   if (!(top && base && top.medianMfe != null && base.medianMfe != null && top.medianMfe > base.medianMfe)) {
     reasons.push("TOP5_MFE");
   }
-  if (
-    top &&
-    base &&
-    top.medianMae != null &&
-    base.medianMae != null &&
-    top.medianMae < base.medianMae - MAE_SLACK_PP
-  ) {
+  if (!top || !base || top.medianMae == null || base.medianMae == null) {
+    reasons.push("MISSING_MAE_EVIDENCE");
+  } else if (top.medianMae < base.medianMae - MAE_SLACK_PP) {
     reasons.push("MAE_WORSE");
   }
   if (ev && ev.resolution && ev.resolution.pct_at_mode >= COLLAPSE_BLOCK_PCT) reasons.push("SCORE_COLLAPSE");
@@ -881,6 +902,8 @@ module.exports = {
   leakageReasons,
   recencyWeightedQuality,
   temporalSplit,
+  indexCreateStream,
+  createsPrior60sAt,
   attachCausalContext,
   scoreResolution,
   evaluateRanking,

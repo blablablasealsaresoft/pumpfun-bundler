@@ -8,7 +8,7 @@ const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
 const v2 = require("./selection-v2");
-const { formatReport } = require("./selection-v2-report");
+const { formatReport, buildReport } = require("./selection-v2-report");
 const { bootstrapMedianDiff } = require("./math");
 
 let passed = 0;
@@ -310,6 +310,70 @@ test("old/new paired comparison", () => {
   assert.strictEqual(pairs[0].newModelVersion, "selection-v2-shadow");
   assert.strictEqual(pairs[0].researchEpoch, "selection_v2_shadow_2026_10");
   assert.ok(pairs[0].oldScore !== undefined && pairs[0].newScore !== undefined);
+});
+
+test("missing MAE fails the research gate", () => {
+  const ev = {
+    n: 200,
+    spearmanPnl: 0.4,
+    mono: { clear: true },
+    cohorts: {
+      top5: { medianPnl: 5, runner10: 0.4, medianMfe: 20, medianMae: null },
+      baseline: { medianPnl: -2, runner10: 0.1, medianMfe: 1, medianMae: -4 },
+    },
+    resolution: { pct_at_mode: 0.05 },
+    permutation: { beatsNull: true },
+    tail: { dependent: false },
+  };
+  const judged = v2.judge(ev);
+  assert.strictEqual(judged.researchVerdict, "FAIL_RESEARCH");
+  assert.ok(judged.gate.reasons.includes("MISSING_MAE_EVIDENCE"));
+  assert.notStrictEqual(judged.researchVerdict, "PASS_RESEARCH");
+});
+
+test("unlabeled create still counts toward createsPrior60s", () => {
+  const labeled = [{ id: "b", mint: "B", ts: 1000, pnl: -1, mfe: 0, mae: -1 }];
+  const onlyLabeled = v2.attachCausalContext(labeled);
+  assert.strictEqual(onlyLabeled[0].createsPrior60s, 0);
+  const withUnlabeled = v2.attachCausalContext(labeled, [
+    { mint: "A", ts: 0 },
+    { mint: "B", ts: 1000 },
+  ]);
+  assert.strictEqual(withUnlabeled[0].createsPrior60s, 1);
+  assert.strictEqual(withUnlabeled[0].regime, "cold");
+});
+
+test("testRunnerQ4 comes from the held-out quartile", () => {
+  const rows = [];
+  for (let i = 0; i < 20; i++) {
+    const train = i < 12;
+    rows.push({
+      id: "q" + i,
+      mint: "M" + i,
+      ts: (i + 1) * 1000,
+      pnl: -1,
+      mae: -2,
+      mfe: train ? (i >= 9 ? 20 : 0) : i >= 18 ? 0 : 20,
+      oldScore: 40 + i,
+      deployerN: 3,
+      rawScore: 10 + i,
+      launches1h: 0,
+      creatorBuySol: 0.2,
+      creatorSol: 1,
+      mayhem: false,
+      skipCohort: "other_skip",
+      sameTxCreatorBuy: false,
+      numSigners: 2,
+    });
+  }
+  const rep = buildReport({ rows, skippedLive: 0, skippedEpoch: 0, skippedNoPnl: 0 });
+  const raw = rep.features.find((f) => f.name === "rawScore");
+  assert.ok(raw);
+  const split = v2.temporalSplit(rows);
+  const train = v2.featureStandalone(split.train, (r) => (r.deployerN >= 1 ? r.rawScore : null));
+  const test = v2.featureStandalone(split.test, (r) => (r.deployerN >= 1 ? r.rawScore : null));
+  assert.notStrictEqual(train.quartiles[3].runner10, test.quartiles[3].runner10);
+  assert.strictEqual(raw.testRunnerQ4, test.quartiles[3].runner10);
 });
 
 test("report cannot emit live recommendation", () => {

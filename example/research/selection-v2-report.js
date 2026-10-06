@@ -41,11 +41,14 @@ function epochOk(row) {
 function loadShadowRows(decisionPath) {
   const raw = loadJsonl(decisionPath);
   const byMint = new Map();
+  const createStream = [];
   let skippedLive = 0;
   let skippedNoPnl = 0;
   let skippedEpoch = 0;
   for (const o of raw) {
     if (!o || !o.mint) continue;
+    const seenTs = num(o.ts);
+    if (seenTs != null) createStream.push({ mint: o.mint, ts: seenTs });
     const reason = String(o.skipReason || "");
     const outcome = reason.includes("|outcome");
     if (o.decision === "buy" || !outcome) {
@@ -94,7 +97,7 @@ function loadShadowRows(decisionPath) {
     const prev = byMint.get(row.mint);
     if (!prev || row.ts < prev.ts) byMint.set(row.mint, row);
   }
-  const rows = v2.attachCausalContext([...byMint.values()]);
+  const rows = v2.attachCausalContext([...byMint.values()], createStream);
   return {
     rows,
     skippedLive,
@@ -194,7 +197,7 @@ function buildReport(loaded) {
       trainRhoPnl: train.spearmanPnl,
       trainRhoMfe: train.spearmanMfe,
       testRhoPnl: test.spearmanPnl,
-      testRunnerQ4: train.quartiles[3] ? train.quartiles[3].runner10 : null,
+      testRunnerQ4: test.quartiles[3] ? test.quartiles[3].runner10 : null,
       trainQMed: train.quartiles.map((q) => q.medianPnl),
       trainQMae: train.quartiles.map((q) => q.medianMae),
     });
