@@ -1549,6 +1549,30 @@ async function handleCreate(
   const createSlot = detect?.createSlot ?? ctx._lastCreateSlot;
   const detectLite = { source, createSlot };
 
+  try {
+    // Telemetry before economic dedupe. A second feed must not create a second trade.
+    require("./research/v3-collector.js").noteSource({
+      mint: mintStr,
+      source,
+      observedAt: Date.now(),
+      slot: createSlot ?? null,
+      creator: meta.creator,
+      creatorSource: "create_event",
+      deployer: meta.user,
+      quoteMint: meta.quoteMint,
+      quoteMintSource: meta.quoteMint ? "create_meta" : null,
+      createVersion:
+        meta.tokenProgram && meta.tokenProgram.includes("Tokenz") ? "create_v2" : "legacy",
+      mayhem: meta.isMayhem,
+      cashback: meta.intent?.holderReward === true,
+      bondingCurve: meta.bondingCurve,
+      tokenProgram: meta.tokenProgram,
+      createSignature: signature,
+    });
+  } catch (err) {
+    console.warn("[V3] source note failed", (err as Error).message);
+  }
+
   if (seen.has(mintStr) || skipMints.has(mintStr)) {
     if (skipMints.has(mintStr)) console.log(`[skip] our mint ${mintStr}`);
     return;
@@ -2608,6 +2632,32 @@ async function main() {
     wsEndpoint: ws,
     commitment: "confirmed",
   });
+  try {
+    const v3 = require("./research/v3-collector.js");
+    const curveMath = require("./research/valuation/curve.js");
+    v3.attachCurveFetcher(async (address: string) => {
+      const info = await connection.getAccountInfo(new PublicKey(address), "processed");
+      if (!info?.data) return null;
+      const acct = BondingCurveAccount.fromBuffer(Buffer.from(info.data));
+      const state = {
+        virtualSolReserves: Number(acct.virtualSolReserves),
+        virtualTokenReserves: Number(acct.virtualTokenReserves),
+        realSolReserves: Number(acct.realSolReserves),
+        realTokenReserves: Number(acct.realTokenReserves),
+        complete: acct.complete,
+      };
+      return {
+        virtualSolReserves: state.virtualSolReserves,
+        virtualTokenReserves: state.virtualTokenReserves,
+        realSolReserves: state.realSolReserves,
+        realTokenReserves: state.realTokenReserves,
+        curveProgress: curveMath.getBondingProgress(state),
+        spotPrice: curveMath.getTokenPriceSol(state),
+      };
+    });
+  } catch (err) {
+    console.warn("[V3] curve fetcher not attached", (err as Error).message);
+  }
   const sdk = new PumpFunSDK(
     new AnchorProvider(connection, new NodeWallet(Keypair.generate()), {
       commitment: "confirmed",
